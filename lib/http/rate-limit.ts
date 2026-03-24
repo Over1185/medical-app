@@ -1,3 +1,4 @@
+import { env } from "@/lib/config/env";
 import { HttpError } from "@/lib/http/response";
 
 type RateLimitState = {
@@ -5,8 +6,8 @@ type RateLimitState = {
   windowStartedAt: number;
 };
 
-const WINDOW_MS = 60_000;
-const MAX_REQUESTS = 30;
+const WINDOW_MS = env.rateLimitWindowMs;
+const MAX_REQUESTS = env.rateLimitMaxRequests;
 const ipBuckets = new Map<string, RateLimitState>();
 
 function getClientIp(request: Request): string {

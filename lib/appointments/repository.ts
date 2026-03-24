@@ -51,7 +51,7 @@ class InMemoryAppointmentRepository implements AppointmentRepository {
       doctorName: input.doctorName,
       appointmentDate: input.appointmentDate,
       reason: input.reason,
-      status: "scheduled",
+      status: "pendiente",
       createdAt: now,
       updatedAt: now,
     };

@@ -2,9 +2,9 @@
  * Estados permitidos para una cita medica.
  */
 export const APPOINTMENT_STATUSES = [
-  "scheduled",
-  "completed",
-  "cancelled",
+  "pendiente",
+  "confirmada",
+  "cancelada",
 ] as const;
 
 export type AppointmentStatus = (typeof APPOINTMENT_STATUSES)[number];

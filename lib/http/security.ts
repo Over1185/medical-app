@@ -1,24 +1,11 @@
-const FALLBACK_ALLOWED_ORIGINS = ["http://localhost:3000"];
-
-function readAllowedOrigins(): string[] {
-  const value = process.env.ALLOWED_ORIGINS;
-
-  if (!value) {
-    return FALLBACK_ALLOWED_ORIGINS;
-  }
-
-  return value
-    .split(",")
-    .map((origin) => origin.trim())
-    .filter(Boolean);
-}
+import { env } from "@/lib/config/env";
 
 export function isOriginAllowed(origin: string | null): boolean {
   if (!origin) {
     return true;
   }
 
-  return readAllowedOrigins().includes(origin);
+  return env.allowedOrigins.includes(origin);
 }
 
 export function buildSecurityHeaders(origin: string | null): Headers {
@@ -28,7 +15,7 @@ export function buildSecurityHeaders(origin: string | null): Headers {
     "X-Frame-Options": "DENY",
     "Referrer-Policy": "no-referrer",
     Vary: "Origin",
-    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
   });
 

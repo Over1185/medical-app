@@ -1,5 +1,6 @@
 import { appointmentRepository } from "@/lib/appointments/repository";
 import type {
+  AppointmentStatus,
   CreateAppointmentInput,
   PaginatedAppointments,
   UpdateAppointmentInput,
@@ -30,6 +31,16 @@ export const appointmentService = {
 
   async update(id: string, input: UpdateAppointmentInput) {
     const updated = await appointmentRepository.update(id, input);
+
+    if (!updated) {
+      throw new AppointmentNotFoundError();
+    }
+
+    return updated;
+  },
+
+  async updateStatus(id: string, status: AppointmentStatus) {
+    const updated = await appointmentRepository.update(id, { status });
 
     if (!updated) {
       throw new AppointmentNotFoundError();

@@ -34,6 +34,10 @@ export const updateAppointmentSchema = z
     message: "Debes enviar al menos un campo a actualizar",
   });
 
+export const updateAppointmentStatusSchema = z.object({
+  status: z.enum(APPOINTMENT_STATUSES),
+});
+
 export const listQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(20),
   offset: z.coerce.number().int().min(0).default(0),
