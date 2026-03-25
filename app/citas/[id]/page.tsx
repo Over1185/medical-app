@@ -35,6 +35,7 @@ export default function AppointmentDetailPage() {
     const [appointment, setAppointment] = useState<Appointment | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
     const [editFormData, setEditFormData] = useState({
         patientName: "",
@@ -112,6 +113,7 @@ export default function AppointmentDetailPage() {
 
     const handleSaveChanges = async () => {
         setFieldErrors({});
+        setIsSaving(true);
         try {
             const updated = await updateAppointment(id, {
                 patientName: editFormData.patientName,
@@ -130,6 +132,8 @@ export default function AppointmentDetailPage() {
             } else {
                 toast.error(getErrorMessage(err, "Error al actualizar la cita"));
             }
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -346,11 +350,28 @@ export default function AppointmentDetailPage() {
                         )}
                     </div>
                     <div className="pt-4 flex flex-col-reverse sm:flex-row sm:justify-end gap-3 border-t border-gray-100 mt-2">
-                        <Button variant="ghost" onClick={handleCancelEdit} className="w-full sm:w-auto">
+                        <Button
+                            variant="ghost"
+                            onClick={handleCancelEdit}
+                            className="w-full sm:w-auto"
+                            disabled={isSaving}
+                        >
                             Cancelar
                         </Button>
-                        <Button variant="primary" onClick={handleSaveChanges} className="w-full sm:w-auto">
-                            Guardar Cambios
+                        <Button
+                            variant="primary"
+                            onClick={handleSaveChanges}
+                            className="w-full sm:w-auto min-w-[140px]"
+                            disabled={isSaving}
+                        >
+                            {isSaving ? (
+                                <span className="flex items-center gap-2">
+                                    <Spinner className="w-4 h-4 text-white" />
+                                    Guardando...
+                                </span>
+                            ) : (
+                                "Guardar Cambios"
+                            )}
                         </Button>
                     </div>
                 </div>
