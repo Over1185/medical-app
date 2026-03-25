@@ -73,11 +73,11 @@ __test__/frontend/
 
 - Archivo: `app/page.tsx`
 - Función principal:
- 	- Lista citas.
- 	- Permite crear una cita en modal.
- 	- Permite confirmar/cancelar cita pendiente.
- 	- Permite eliminar cita con confirmación en modal.
- 	- Navega al detalle de una cita.
+  - Lista citas.
+  - Permite crear una cita en modal.
+  - Permite confirmar/cancelar cita pendiente.
+  - Permite eliminar cita con confirmación en modal.
+  - Navega al detalle de una cita.
 
 Estados manejados en pantalla:
 
@@ -90,10 +90,10 @@ Estados manejados en pantalla:
 
 - Archivo: `app/citas/[id]/page.tsx`
 - Función principal:
- 	- Busca la cita por `id` desde el estado del hook.
- 	- Muestra información completa de cita.
- 	- Permite cambiar estado (confirmada/cancelada).
- 	- Permite eliminar con modal de confirmación.
+  - Busca la cita por `id` desde el estado del hook.
+  - Muestra información completa de cita.
+  - Permite cambiar estado (confirmada/cancelada).
+  - Permite eliminar con modal de confirmación.
 
 Notas:
 
@@ -150,8 +150,8 @@ Responsabilidades:
 - Render de errores por campo provenientes del backend.
 - Manejo de estados de envío (`isSubmitting`).
 - Emisión de callbacks:
- 	- `onSuccess()` cuando se crea correctamente.
- 	- `onCancel()` cuando el usuario cierra/cancela.
+  - `onSuccess()` cuando se crea correctamente.
+  - `onCancel()` cuando el usuario cierra/cancela.
 
 Validación y errores:
 
@@ -191,8 +191,8 @@ Validación y errores:
 ### 7.5 Skeleton y Spinner
 
 - Archivos:
- 	- `components/ui/Skeleton.tsx`
- 	- `components/ui/Spinner.tsx`
+  - `components/ui/Skeleton.tsx`
+  - `components/ui/Spinner.tsx`
 - Se usan para percepción de carga y continuidad visual.
 
 ---
@@ -240,6 +240,7 @@ Ubicación:
 - `__test__/frontend/page.test.tsx`
 - `__test__/frontend/useAppointments.test.tsx`
 - `__test__/frontend/CreateAppointmentForm.test.tsx`
+- `__test__/frontend/appointment-detail-page.test.tsx`
 
 Ejecución:
 
@@ -252,5 +253,7 @@ Cobertura funcional actual:
 - Render principal de dashboard.
 - Ciclo de datos del hook (`load`, `create`, rollback en `updateStatus`).
 - Flujo del formulario (`submit`, errores de validación, cancelación).
+- Estados del detalle (`loading`, cita no encontrada).
+- Apertura de modal de eliminación en detalle.
 
 ---
