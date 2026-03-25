@@ -361,7 +361,7 @@ export default function AppointmentDetailPage() {
                         <Button
                             variant="primary"
                             onClick={handleSaveChanges}
-                            className="w-full sm:w-auto min-w-[140px]"
+                            className="w-full sm:w-auto min-w-35"
                             disabled={isSaving}
                         >
                             {isSaving ? (
