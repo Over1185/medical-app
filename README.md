@@ -21,7 +21,7 @@ Actualmente el backend incluye:
 ## Documentacion
 
 - Backend extendido: [docs/backend/README.md](docs/backend/README.md)
-- Frontend: [docs/frontend](docs/frontend/README.md) (en desarrollo)
+- Frontend: [docs/frontend/README.md](docs/frontend/README.md) (en desarrollo)
 - Despliegue: [docs/deployment/README.md](docs/deployment/README.md) (en desarrollo)
 
 ## Requisitos
