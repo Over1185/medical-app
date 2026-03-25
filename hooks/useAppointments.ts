@@ -27,38 +27,51 @@ export function useAppointments() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(input),
         });
-        if (!res.ok) throw new Error('Error al crear la cita');
+
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => null);
+            if (errorData?.error) {
+                const errorMessage = errorData.error.message || 'Error al crear la cita';
+                const newErr: any = new Error(errorMessage);
+                if (errorData.error.code === 'VALIDATION_ERROR' && errorData.error.details?.fieldErrors) {
+                    newErr.fieldErrors = errorData.error.details.fieldErrors;
+                }
+                throw newErr;
+            }
+            throw new Error('Error al crear la cita');
+        }
+
         await fetchAppointments();
     };
 
     const updateStatus = async (id: string, status: AppointmentStatus) => {
-    const previousState = [...appointments];
-    setAppointments(prev => prev.map(a => a.id === id ? { ...a, status } : a));
+        const previousState = [...appointments];
+        setAppointments(prev => prev.map(a => a.id === id ? { ...a, status } : a));
 
-    try {
-      const res = await fetch(`/appointments/${id}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
-      });
-      if (!res.ok) throw new Error('Error al actualizar el estado');
-    } catch (error) {
-      setAppointments(previousState);
-      throw error;
-    }
-  };
+        try {
+            const res = await fetch(`/appointments/${id}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status }),
+            });
+            if (!res.ok) throw new Error('Error al actualizar el estado');
+        } catch (error) {
+            setAppointments(previousState);
+            throw error;
+        }
+    };
 
     const deleteAppointment = async (id: string) => {
-    const previousState = [...appointments];
-    setAppointments(prev => prev.filter(a => a.id !== id));
-    try {
-      const res = await fetch(`/appointments/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Error al eliminar la cita');
-    } catch (err: any) {
-      setAppointments(previousState);
-      throw err;
-    }
-  };
+        const previousState = [...appointments];
+        setAppointments(prev => prev.filter(a => a.id !== id));
+        try {
+            const res = await fetch(`/appointments/${id}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error('Error al eliminar la cita');
+        } catch (err: any) {
+            setAppointments(previousState);
+            throw err;
+        }
+    };
 
     useEffect(() => {
         fetchAppointments();

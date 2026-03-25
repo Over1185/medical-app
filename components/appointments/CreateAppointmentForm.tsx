@@ -20,10 +20,12 @@ export function CreateAppointmentForm({ onSuccess, onCancel }: CreateAppointment
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
+        setFieldErrors({}); 
 
         try {
             const dateIso = new Date(formData.appointmentDate).toISOString();
@@ -34,7 +36,12 @@ export function CreateAppointmentForm({ onSuccess, onCancel }: CreateAppointment
             toast.success("¡Cita creada con éxito!");
             onSuccess();
         } catch (err: any) {
-            toast.error(err.message || "Ocurrió un error al crear la cita");
+            if (err.fieldErrors) {
+                setFieldErrors(err.fieldErrors);
+                toast.error("Por favor revisa los campos señalados");
+            } else {
+                toast.error(err.message || "Ocurrió un error al crear la cita");
+            }
         } finally {
             setIsSubmitting(false);
         }
@@ -42,6 +49,9 @@ export function CreateAppointmentForm({ onSuccess, onCancel }: CreateAppointment
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+        if (fieldErrors[e.target.name]) {
+            setFieldErrors(prev => ({ ...prev, [e.target.name]: [] }));
+        }
     };
 
     return (
@@ -54,9 +64,12 @@ export function CreateAppointmentForm({ onSuccess, onCancel }: CreateAppointment
                     value={formData.patientName}
                     onChange={handleChange}
                     required
-                    className="w-full h-10 px-3 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary bg-white text-gray-900"
+                    className={`w-full h-10 px-3 py-2 rounded-lg border ${fieldErrors.patientName?.length ? 'border-red-500 focus:ring-red-500' : 'border-border focus:ring-primary'} focus:outline-none focus:ring-2 bg-white text-gray-900`}
                     placeholder="Ej. Juan Pérez"
                 />
+                {fieldErrors.patientName?.length > 0 && (
+                    <p className="text-sm text-red-500 mt-1">{fieldErrors.patientName[0]}</p>
+                )}
             </div>
 
             <div className="space-y-2">
@@ -67,9 +80,12 @@ export function CreateAppointmentForm({ onSuccess, onCancel }: CreateAppointment
                     value={formData.doctorName}
                     onChange={handleChange}
                     required
-                    className="w-full h-10 px-3 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary bg-white text-gray-900"
+                    className={`w-full h-10 px-3 py-2 rounded-lg border ${fieldErrors.doctorName?.length ? 'border-red-500 focus:ring-red-500' : 'border-border focus:ring-primary'} focus:outline-none focus:ring-2 bg-white text-gray-900`}
                     placeholder="Ej. Dra. Ana Gómez"
                 />
+                {fieldErrors.doctorName?.length > 0 && (
+                    <p className="text-sm text-red-500 mt-1">{fieldErrors.doctorName[0]}</p>
+                )}
             </div>
 
             <div className="space-y-2">
@@ -80,8 +96,11 @@ export function CreateAppointmentForm({ onSuccess, onCancel }: CreateAppointment
                     value={formData.appointmentDate}
                     onChange={handleChange}
                     required
-                    className="w-full h-10 px-3 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary bg-white text-gray-900"
+                    className={`w-full h-10 px-3 py-2 rounded-lg border ${fieldErrors.appointmentDate?.length ? 'border-red-500 focus:ring-red-500' : 'border-border focus:ring-primary'} focus:outline-none focus:ring-2 bg-white text-gray-900`}
                 />
+                {fieldErrors.appointmentDate?.length > 0 && (
+                    <p className="text-sm text-red-500 mt-1">{fieldErrors.appointmentDate[0]}</p>
+                )}
             </div>
 
             <div className="space-y-2">
@@ -92,9 +111,12 @@ export function CreateAppointmentForm({ onSuccess, onCancel }: CreateAppointment
                     onChange={handleChange}
                     required
                     rows={3}
-                    className="w-full p-3 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary bg-white text-gray-900 resize-none"
+                    className={`w-full p-3 rounded-lg border ${fieldErrors.reason?.length ? 'border-red-500 focus:ring-red-500' : 'border-border focus:ring-primary'} focus:outline-none focus:ring-2 bg-white text-gray-900 resize-none`}
                     placeholder="Síntomas, chequeo general, etc."
                 />
+                {fieldErrors.reason?.length > 0 && (
+                    <p className="text-sm text-red-500 mt-1">{fieldErrors.reason[0]}</p>
+                )}
             </div>
 
             <div className="pt-4 flex justify-end gap-3 border-t border-gray-100 mt-6">
