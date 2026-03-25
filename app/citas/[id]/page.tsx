@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Spinner } from "@/components/ui/Spinner";
-import { IconArrowLeft, IconEdit, IconTrash, IconCalendarEvent, IconStethoscope } from "@tabler/icons-react";
+import { SkeletonDetail } from "@/components/ui/Skeleton";
+import { IconArrowLeft, IconTrash, IconCalendarEvent } from "@tabler/icons-react";
 import Link from "next/link";
 import { useAppointments } from "@/hooks/useAppointments";
 import { toast } from "sonner";
@@ -56,9 +57,22 @@ export default function AppointmentDetailPage() {
 
     if (loading) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[80vh] space-y-4">
-                <Spinner className="w-12 h-12 text-primary" />
-                <p className="text-gray-500 font-medium">Cargando detalles de la cita...</p>
+            <div className="max-w-4xl mx-auto p-6 space-y-6 animate-in fade-in duration-500 relative">
+                <Link href="/">
+                    <Button variant="ghost" className="mb-2 -ml-3 text-gray-500 hover:text-gray-900" disabled>
+                        <IconArrowLeft className="w-5 h-5 mr-2" />
+                        Volver al Panel
+                    </Button>
+                </Link>
+                <div className="opacity-50 blur-[2px] pointer-events-none">
+                    <SkeletonDetail />
+                </div>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <div className="bg-white/90 backdrop-blur-md p-6 rounded-2xl shadow-xl flex flex-col items-center">
+                        <Spinner className="w-12 h-12 text-primary" />
+                        <p className="text-gray-800 font-medium mt-4">Cargando detalles de consulta...</p>
+                    </div>
+                </div>
             </div>
         );
     }

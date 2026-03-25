@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
 import { useAppointments } from "@/hooks/useAppointments";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Card, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { Spinner } from "@/components/ui/Spinner";
+import { SkeletonCard } from "@/components/ui/Skeleton";
 import { IconPlus, IconTrash, IconCheck, IconX, IconCalendarEvent, IconUser, IconStethoscope } from "@tabler/icons-react";
 import Link from "next/link";
 import type { AppointmentStatus } from "@/lib/appointments/types";
@@ -39,8 +40,20 @@ export default function AppointmentsPage() {
         </div>
       )}
 
-      {loading ? (
-        <div className="text-center py-12 text-gray-500">Cargando citas...</div>
+      {loading && appointments.length === 0 ? (
+        <div className="relative mt-6">
+          <div className="grid gap-4 opacity-50 blur-[2px] pointer-events-none">
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </div>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <div className="bg-white/90 backdrop-blur-md p-6 rounded-2xl shadow-xl flex flex-col items-center">
+              <Spinner className="w-12 h-12 text-primary" />
+              <p className="text-gray-800 font-medium mt-4">Actualizando citas médicas...</p>
+            </div>
+          </div>
+        </div>
       ) : appointments.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-xl border border-border mt-6">
           <IconCalendarEvent className="w-12 h-12 mx-auto text-gray-300 mb-4" />
@@ -63,7 +76,7 @@ export default function AppointmentsPage() {
                         {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
                       </Badge>
                     </div>
-                    
+
                     <div className="flex flex-wrap gap-4 text-sm text-gray-600">
                       <div className="flex items-center gap-1.5">
                         <IconStethoscope className="w-4 h-4" />
@@ -82,18 +95,18 @@ export default function AppointmentsPage() {
                   <div className="flex items-center gap-2">
                     {appointment.status === 'pendiente' && (
                       <>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           className="text-green-600 hover:text-green-700 hover:bg-green-50"
                           onClick={() => updateStatus(appointment.id, 'confirmada')}
                           title="Confirmar"
                         >
                           <IconCheck className="w-5 h-5" />
                         </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           onClick={() => updateStatus(appointment.id, 'cancelada')}
                           title="Cancelar"
@@ -105,12 +118,12 @@ export default function AppointmentsPage() {
                     <Link href={`/citas/${appointment.id}`}>
                       <Button variant="secondary" size="sm">Ver Detalles</Button>
                     </Link>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className="text-gray-400 hover:text-red-600"
                       onClick={() => {
-                        if(confirm('¿Eliminar cita?')) deleteAppointment(appointment.id);
+                        if (confirm('¿Eliminar cita?')) deleteAppointment(appointment.id);
                       }}
                     >
                       <IconTrash className="w-5 h-5" />

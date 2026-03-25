@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import type { Appointment, CreateAppointmentInput, UpdateAppointmentInput, AppointmentStatus } from '@/lib/appointments/types';
+import type { Appointment, CreateAppointmentInput, AppointmentStatus } from '@/lib/appointments/types';
 
 export function useAppointments() {
     const [appointments, setAppointments] = useState<Appointment[]>([]);
