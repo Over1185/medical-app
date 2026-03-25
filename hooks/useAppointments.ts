@@ -1,6 +1,19 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { Appointment, CreateAppointmentInput, AppointmentStatus } from '@/lib/appointments/types';
 
+type FieldErrors = Record<string, string[]>;
+type CreateAppointmentApiError = Error & {
+    fieldErrors?: FieldErrors;
+};
+
+const getErrorMessage = (error: unknown, fallback: string): string => {
+    if (error instanceof Error) {
+        return error.message;
+    }
+
+    return fallback;
+};
+
 /**
  * Hook de acceso y gestión de citas en el frontend.
  * Expone estado local, acciones CRUD y refresco manual de datos.
@@ -21,8 +34,8 @@ export function useAppointments() {
             const json = await res.json();
             setAppointments(json.data || []);
             setError(null);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) {
+            setError(getErrorMessage(err, 'Error al cargar las citas'));
         } finally {
             setLoading(false);
         }
@@ -42,7 +55,7 @@ export function useAppointments() {
             const errorData = await res.json().catch(() => null);
             if (errorData?.error) {
                 const errorMessage = errorData.error.message || 'Error al crear la cita';
-                const newErr: any = new Error(errorMessage);
+                const newErr = new Error(errorMessage) as CreateAppointmentApiError;
                 if (errorData.error.code === 'VALIDATION_ERROR' && errorData.error.details?.fieldErrors) {
                     newErr.fieldErrors = errorData.error.details.fieldErrors;
                 }
@@ -84,7 +97,7 @@ export function useAppointments() {
         try {
             const res = await fetch(`/appointments/${id}`, { method: 'DELETE' });
             if (!res.ok) throw new Error('Error al eliminar la cita');
-        } catch (err: any) {
+        } catch (err: unknown) {
             setAppointments(previousState);
             throw err;
         }

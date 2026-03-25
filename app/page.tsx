@@ -14,6 +14,14 @@ import Link from "next/link";
 import type { AppointmentStatus } from "@/lib/appointments/types";
 import { toast } from "sonner";
 
+const getErrorMessage = (error: unknown, fallback: string): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return fallback;
+};
+
 /**
  * Vista principal del dashboard de citas.
  * Permite listar, crear, cambiar estado y eliminar citas.
@@ -117,8 +125,8 @@ export default function AppointmentsPage() {
                               // Confirmación optimista: primero actualiza estado y luego notifica éxito.
                               await updateStatus(appointment.id, 'confirmada');
                               toast.success("Cita confirmada correctamente");
-                            } catch (e: any) {
-                              toast.error("Error al confirmar cita");
+                            } catch (e: unknown) {
+                              toast.error(getErrorMessage(e, "Error al confirmar cita"));
                             }
                           }}
                           title="Confirmar"
@@ -134,8 +142,8 @@ export default function AppointmentsPage() {
                               // Cancelación optimista con rollback manejado dentro del hook.
                               await updateStatus(appointment.id, 'cancelada');
                               toast.success("Cita cancelada correctamente");
-                            } catch (e: any) {
-                              toast.error("Error al cancelar cita");
+                            } catch (e: unknown) {
+                              toast.error(getErrorMessage(e, "Error al cancelar cita"));
                             }
                           }}
                           title="Cancelar"
