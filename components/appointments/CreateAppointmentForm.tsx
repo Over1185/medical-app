@@ -9,6 +9,9 @@ type ValidationError = {
     message?: string;
 };
 
+/**
+ * Type guard para reconocer errores de validación provenientes de la API.
+ */
 const isValidationError = (error: unknown): error is ValidationError => {
     return typeof error === "object" && error !== null;
 };
@@ -78,7 +81,8 @@ export function CreateAppointmentForm({ onSuccess, onCancel }: CreateAppointment
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5" >
+            {/* Formulario con campos controlados y validación visual de errores. */}
             <div className="space-y-2">
                 <label htmlFor="patientName" className="text-sm font-medium text-gray-700">Nombre del Paciente</label>
                 <input
@@ -159,6 +163,6 @@ export function CreateAppointmentForm({ onSuccess, onCancel }: CreateAppointment
                     )}
                 </Button>
             </div>
-        </form>
+        </form >
     );
 }

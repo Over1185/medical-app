@@ -15,6 +15,9 @@ import { useAppointments } from "@/hooks/useAppointments";
 import { toast } from "sonner";
 import type { Appointment, AppointmentStatus } from "@/lib/appointments/types";
 
+/**
+ * Extrae un mensaje seguro para UI desde un error desconocido.
+ */
 const getErrorMessage = (error: unknown, fallback: string): string => {
     if (error instanceof Error) {
         return error.message;
@@ -44,12 +47,18 @@ export default function AppointmentDetailPage() {
         reason: "",
     });
 
+    /**
+     * Convierte una fecha ISO a formato `datetime-local` respetando zona horaria local.
+     */
     const toLocalDateTime = (isoDate: string): string => {
         const date = new Date(isoDate);
         const timezoneOffsetInMs = date.getTimezoneOffset() * 60 * 1000;
         return new Date(date.getTime() - timezoneOffsetInMs).toISOString().slice(0, 16);
     };
 
+    /**
+     * Sincroniza el formulario de edición con la cita actual.
+     */
     const syncEditForm = (source: Appointment) => {
         setEditFormData({
             patientName: source.patientName,
@@ -98,6 +107,9 @@ export default function AppointmentDetailPage() {
         }
     };
 
+    /**
+     * Actualiza el formulario de edición y limpia el error del campo editado.
+     */
     const handleEditFieldChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = event.target;
         setEditFormData(prev => ({ ...prev, [name]: value }));
@@ -111,6 +123,9 @@ export default function AppointmentDetailPage() {
         }
     };
 
+    /**
+     * Persiste cambios de datos generales de la cita mediante PUT.
+     */
     const handleSaveChanges = async () => {
         setFieldErrors({});
         setIsSaving(true);
@@ -137,6 +152,9 @@ export default function AppointmentDetailPage() {
         }
     };
 
+    /**
+     * Cancela edición y restaura valores originales en el formulario.
+     */
     const handleCancelEdit = () => {
         if (appointment) {
             syncEditForm(appointment);
@@ -153,6 +171,7 @@ export default function AppointmentDetailPage() {
         return 'warning';
     };
 
+    // Render de carga con skeleton y mensaje superpuesto para mejor UX.
     if (loading) {
         return (
             <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6 animate-in fade-in duration-500 relative w-full flex flex-col">
@@ -177,6 +196,7 @@ export default function AppointmentDetailPage() {
         );
     }
 
+    // Render de error cuando no se encuentra la cita (id inválido o eliminada).
     if (!appointment) {
         return (
             <div className="text-center py-20 bg-white rounded-2xl border border-gray-200 mt-10 max-w-3xl mx-auto shadow-sm animate-in fade-in duration-500">
@@ -197,7 +217,7 @@ export default function AppointmentDetailPage() {
                     Volver al Panel
                 </Button>
             </Link>
-
+            {/* Card de detalles de la cita */}
             <Card className="shadow-lg border-border">
                 <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-6 gap-4 bg-gray-50/50 rounded-t-xl">
                     <div className="space-y-1">
@@ -286,7 +306,7 @@ export default function AppointmentDetailPage() {
                     </div>
                 </CardContent>
             </Card>
-
+            {/* Modal de edición de datos generales */}
             <Modal
                 isOpen={isEditing}
                 onClose={handleCancelEdit}
@@ -294,8 +314,9 @@ export default function AppointmentDetailPage() {
             >
                 <div className="space-y-4">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Paciente</label>
+                        <label htmlFor="edit-patientName" className="text-sm font-medium text-gray-700">Paciente</label>
                         <input
+                            id="edit-patientName"
                             type="text"
                             name="patientName"
                             value={editFormData.patientName}
@@ -308,8 +329,9 @@ export default function AppointmentDetailPage() {
                         )}
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Especialista</label>
+                        <label htmlFor="edit-doctorName" className="text-sm font-medium text-gray-700">Especialista</label>
                         <input
+                            id="edit-doctorName"
                             type="text"
                             name="doctorName"
                             value={editFormData.doctorName}
@@ -322,8 +344,9 @@ export default function AppointmentDetailPage() {
                         )}
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Fecha Programada</label>
+                        <label htmlFor="edit-appointmentDate" className="text-sm font-medium text-gray-700">Fecha Programada</label>
                         <input
+                            id="edit-appointmentDate"
                             type="datetime-local"
                             name="appointmentDate"
                             value={editFormData.appointmentDate}
@@ -336,8 +359,9 @@ export default function AppointmentDetailPage() {
                         )}
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Motivo de Consulta</label>
+                        <label htmlFor="edit-reason" className="text-sm font-medium text-gray-700">Motivo de Consulta</label>
                         <textarea
+                            id="edit-reason"
                             name="reason"
                             rows={4}
                             value={editFormData.reason}
@@ -376,7 +400,7 @@ export default function AppointmentDetailPage() {
                     </div>
                 </div>
             </Modal>
-
+            {/* Modal de confirmación de eliminación */}
             <Modal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
