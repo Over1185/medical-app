@@ -1,5 +1,10 @@
 import { useState, useCallback, useEffect } from 'react';
-import type { Appointment, CreateAppointmentInput, AppointmentStatus } from '@/lib/appointments/types';
+import type {
+    Appointment,
+    CreateAppointmentInput,
+    AppointmentStatus,
+    UpdateAppointmentInput,
+} from '@/lib/appointments/types';
 
 type FieldErrors = Record<string, string[]>;
 type CreateAppointmentApiError = Error & {
@@ -68,6 +73,29 @@ export function useAppointments() {
     };
 
     /**
+     * Actualiza datos de una cita consumiendo PUT /appointments/:id.
+     */
+    const updateAppointment = async (id: string, input: UpdateAppointmentInput) => {
+        const res = await fetch(`/appointments/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(input),
+        });
+
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => null);
+            if (errorData?.error?.message) {
+                throw new Error(errorData.error.message);
+            }
+            throw new Error('Error al actualizar la cita');
+        }
+
+        const updated = (await res.json()) as Appointment;
+        setAppointments(prev => prev.map(a => a.id === id ? updated : a));
+        return updated;
+    };
+
+    /**
      * Actualiza estado con enfoque optimista para feedback inmediato.
      * Si la API falla, revierte al estado previo.
      */
@@ -113,6 +141,7 @@ export function useAppointments() {
         loading,
         error,
         createAppointment,
+        updateAppointment,
         updateStatus,
         deleteAppointment,
         refresh: fetchAppointments

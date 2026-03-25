@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import type { ChangeEvent } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -29,16 +30,41 @@ const getErrorMessage = (error: unknown, fallback: string): string => {
 export default function AppointmentDetailPage() {
     const router = useRouter();
     const { id } = useParams() as { id: string };
-    const { appointments, loading, deleteAppointment, updateStatus } = useAppointments();
+    const { appointments, loading, deleteAppointment, updateStatus, updateAppointment } = useAppointments();
 
     const [appointment, setAppointment] = useState<Appointment | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editFormData, setEditFormData] = useState({
+        patientName: "",
+        doctorName: "",
+        appointmentDate: "",
+        reason: "",
+    });
+
+    const toLocalDateTime = (isoDate: string): string => {
+        const date = new Date(isoDate);
+        const timezoneOffsetInMs = date.getTimezoneOffset() * 60 * 1000;
+        return new Date(date.getTime() - timezoneOffsetInMs).toISOString().slice(0, 16);
+    };
+
+    const syncEditForm = (source: Appointment) => {
+        setEditFormData({
+            patientName: source.patientName,
+            doctorName: source.doctorName,
+            appointmentDate: toLocalDateTime(source.appointmentDate),
+            reason: source.reason,
+        });
+    };
 
     // Resuelve la cita actual a partir del id de la ruta y la lista cargada.
     useEffect(() => {
         if (appointments && appointments.length > 0) {
             const found = appointments.find(a => a.id === id);
-            if (found) setAppointment(found);
+            if (found) {
+                setAppointment(found);
+                syncEditForm(found);
+            }
         }
     }, [appointments, id]);
 
@@ -67,6 +93,34 @@ export default function AppointmentDetailPage() {
         } catch (err: unknown) {
             toast.error(getErrorMessage(err, "Error al actualizar estado"));
         }
+    };
+
+    const handleEditFieldChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = event.target;
+        setEditFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSaveChanges = async () => {
+        try {
+            const updated = await updateAppointment(id, {
+                patientName: editFormData.patientName,
+                doctorName: editFormData.doctorName,
+                appointmentDate: new Date(editFormData.appointmentDate).toISOString(),
+                reason: editFormData.reason,
+            });
+            setAppointment(updated);
+            setIsEditing(false);
+            toast.success("Cita actualizada correctamente");
+        } catch (err: unknown) {
+            toast.error(getErrorMessage(err, "Error al actualizar la cita"));
+        }
+    };
+
+    const handleCancelEdit = () => {
+        if (appointment) {
+            syncEditForm(appointment);
+        }
+        setIsEditing(false);
     };
 
     /**
@@ -141,48 +195,120 @@ export default function AppointmentDetailPage() {
                                     <IconCalendarEvent className="w-4 h-4" />
                                     Fecha Programada
                                 </h4>
-                                <p className="text-xl font-semibold text-gray-900">
-                                    {new Date(appointment.appointmentDate).toLocaleString('es-ES', {
-                                        dateStyle: 'full',
-                                    })}
-                                </p>
-                                <p className="text-md text-gray-600 mt-1">
-                                    {new Date(appointment.appointmentDate).toLocaleString('es-ES', {
-                                        timeStyle: 'short'
-                                    })} Hrs
-                                </p>
+                                {isEditing ? (
+                                    <input
+                                        aria-label="Fecha Programada"
+                                        type="datetime-local"
+                                        name="appointmentDate"
+                                        value={editFormData.appointmentDate}
+                                        onChange={handleEditFieldChange}
+                                        className="w-full h-10 px-3 py-2 rounded-lg border border-border focus:ring-primary focus:outline-none focus:ring-2 bg-white text-gray-900"
+                                    />
+                                ) : (
+                                    <>
+                                        <p className="text-xl font-semibold text-gray-900">
+                                            {new Date(appointment.appointmentDate).toLocaleString('es-ES', {
+                                                dateStyle: 'full',
+                                            })}
+                                        </p>
+                                        <p className="text-md text-gray-600 mt-1">
+                                            {new Date(appointment.appointmentDate).toLocaleString('es-ES', {
+                                                timeStyle: 'short'
+                                            })} Hrs
+                                        </p>
+                                    </>
+                                )}
                             </div>
 
                             <div>
                                 <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Paciente</h4>
-                                <p className="text-xl font-medium text-gray-900">{appointment.patientName}</p>
+                                {isEditing ? (
+                                    <input
+                                        aria-label="Paciente"
+                                        type="text"
+                                        name="patientName"
+                                        value={editFormData.patientName}
+                                        onChange={handleEditFieldChange}
+                                        className="w-full h-10 px-3 py-2 rounded-lg border border-border focus:ring-primary focus:outline-none focus:ring-2 bg-white text-gray-900"
+                                    />
+                                ) : (
+                                    <p className="text-xl font-medium text-gray-900">{appointment.patientName}</p>
+                                )}
                             </div>
 
                             <div>
                                 <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Especialista</h4>
-                                <p className="text-lg font-medium text-gray-900 flex items-center gap-2">
-                                    <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs shadow-sm">
-                                        {appointment.doctorName.charAt(0).toUpperCase()}
-                                    </span>
-                                    Dr. {appointment.doctorName}
-                                </p>
+                                {isEditing ? (
+                                    <input
+                                        aria-label="Especialista"
+                                        type="text"
+                                        name="doctorName"
+                                        value={editFormData.doctorName}
+                                        onChange={handleEditFieldChange}
+                                        className="w-full h-10 px-3 py-2 rounded-lg border border-border focus:ring-primary focus:outline-none focus:ring-2 bg-white text-gray-900"
+                                    />
+                                ) : (
+                                    <p className="text-lg font-medium text-gray-900 flex items-center gap-2">
+                                        <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs shadow-sm">
+                                            {appointment.doctorName.charAt(0).toUpperCase()}
+                                        </span>
+                                        Dr. {appointment.doctorName}
+                                    </p>
+                                )}
                             </div>
                         </div>
 
                         <div className="flex flex-col h-full">
                             <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Motivo de Consulta</h4>
-                            <div className="p-6 bg-yellow-50/50 border border-yellow-100 rounded-xl grow text-gray-700 leading-relaxed shadow-inner">
-                                {appointment.reason}
-                            </div>
+                            {isEditing ? (
+                                <textarea
+                                    aria-label="Motivo de Consulta"
+                                    name="reason"
+                                    rows={4}
+                                    value={editFormData.reason}
+                                    onChange={handleEditFieldChange}
+                                    className="p-4 bg-white border border-border rounded-xl grow text-gray-700 leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary"
+                                />
+                            ) : (
+                                <div className="p-6 bg-yellow-50/50 border border-yellow-100 rounded-xl grow text-gray-700 leading-relaxed shadow-inner">
+                                    {appointment.reason}
+                                </div>
+                            )}
                         </div>
                     </div>
 
                     <div className="mt-12 pt-8 border-t border-gray-100 flex flex-col md:flex-row gap-4 md:items-center justify-between">
                         <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                            {isEditing ? (
+                                <>
+                                    <Button
+                                        variant="primary"
+                                        onClick={handleSaveChanges}
+                                        className="w-full sm:w-auto shadow-sm"
+                                    >
+                                        Guardar Cambios
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        onClick={handleCancelEdit}
+                                        className="w-full sm:w-auto"
+                                    >
+                                        Cancelar Edicion
+                                    </Button>
+                                </>
+                            ) : (
+                                <Button
+                                    variant="secondary"
+                                    onClick={() => setIsEditing(true)}
+                                    className="w-full sm:w-auto shadow-sm"
+                                >
+                                    Editar Datos
+                                </Button>
+                            )}
                             <Button
                                 variant="secondary"
                                 onClick={() => handleStatusChange('confirmada')}
-                                disabled={appointment.status === 'confirmada'}
+                                disabled={isEditing || appointment.status === 'confirmada'}
                                 className="w-full sm:w-auto shadow-sm"
                             >
                                 Confirmar Asistencia
@@ -190,7 +316,7 @@ export default function AppointmentDetailPage() {
                             <Button
                                 variant="secondary"
                                 onClick={() => handleStatusChange('cancelada')}
-                                disabled={appointment.status === 'cancelada'}
+                                disabled={isEditing || appointment.status === 'cancelada'}
                                 className="w-full sm:w-auto shadow-sm"
                             >
                                 Cancelar Cita

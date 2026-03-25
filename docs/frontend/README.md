@@ -92,6 +92,7 @@ Estados manejados en pantalla:
 - Función principal:
   - Busca la cita por `id` desde el estado del hook.
   - Muestra información completa de cita.
+  - Permite editar datos de la cita (paciente, doctor, fecha y motivo).
   - Permite cambiar estado (confirmada/cancelada).
   - Permite eliminar con modal de confirmación.
 
@@ -117,6 +118,7 @@ Estado expuesto:
 Acciones expuestas:
 
 - `createAppointment(input)`
+- `updateAppointment(id, input)`
 - `updateStatus(id, status)`
 - `deleteAppointment(id)`
 - `refresh()`
@@ -125,13 +127,15 @@ Comportamiento clave:
 
 1. Carga inicial al montar (`useEffect` + `fetchAppointments`).
 2. `createAppointment` hace `POST /appointments` y luego `refresh`.
-3. `updateStatus` aplica actualización optimista local y rollback si falla.
-4. `deleteAppointment` aplica eliminación optimista local y rollback si falla.
+3. `updateAppointment` consume `PUT /appointments/:id` y sincroniza estado local.
+4. `updateStatus` aplica actualización optimista local y rollback si falla.
+5. `deleteAppointment` aplica eliminación optimista local y rollback si falla.
 
 ### 5.2 Endpoints consumidos por el frontend
 
 - `GET /appointments`
 - `POST /appointments`
+- `PUT /appointments/:id`
 - `PATCH /appointments/:id/status`
 - `DELETE /appointments/:id`
 
