@@ -25,7 +25,7 @@ export function CreateAppointmentForm({ onSuccess, onCancel }: CreateAppointment
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
-        setFieldErrors({}); 
+        setFieldErrors({});
 
         try {
             const dateIso = new Date(formData.appointmentDate).toISOString();
@@ -119,11 +119,11 @@ export function CreateAppointmentForm({ onSuccess, onCancel }: CreateAppointment
                 )}
             </div>
 
-            <div className="pt-4 flex justify-end gap-3 border-t border-gray-100 mt-6">
-                <Button type="button" variant="ghost" onClick={onCancel} disabled={isSubmitting}>
+            <div className="pt-4 flex flex-col-reverse sm:flex-row sm:justify-end gap-3 border-t border-gray-100 mt-6">
+                <Button type="button" variant="ghost" className="w-full sm:w-auto" onClick={onCancel} disabled={isSubmitting}>
                     Cancelar
                 </Button>
-                <Button type="submit" disabled={isSubmitting}>
+                <Button type="submit" className="w-full sm:w-auto" disabled={isSubmitting}>
                     {isSubmitting ? 'Guardando...' : (
                         <>
                             <IconCheck className="w-5 h-5 mr-2" />

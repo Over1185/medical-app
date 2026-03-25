@@ -27,13 +27,13 @@ export default function AppointmentsPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="max-w-5xl mx-auto p-4 sm:p-6 space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Citas Médicas</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Citas Médicas</h1>
           <p className="text-gray-500 mt-1">Gestiona los pacientes y horarios</p>
         </div>
-        <Button onClick={() => setIsCreateModalOpen(true)}>
+        <Button onClick={() => setIsCreateModalOpen(true)} className="w-full sm:w-auto">
           <IconPlus className="w-5 h-5 mr-2" />
           Nueva Cita
         </Button>
@@ -75,29 +75,29 @@ export default function AppointmentsPage() {
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="space-y-3">
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                       <h3 className="text-lg font-semibold">{appointment.patientName}</h3>
                       <Badge variant={getStatusBadgeVariant(appointment.status)}>
                         {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
                       </Badge>
                     </div>
 
-                    <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                    <div className="flex flex-wrap gap-3 sm:gap-4 text-sm text-gray-600">
                       <div className="flex items-center gap-1.5">
-                        <IconStethoscope className="w-4 h-4" />
-                        Dr. {appointment.doctorName}
+                        <IconStethoscope className="w-4 h-4 shrink-0" />
+                        <span className="truncate">Dr. {appointment.doctorName}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <IconCalendarEvent className="w-4 h-4" />
-                        {new Date(appointment.appointmentDate).toLocaleString('es-ES', {
+                        <IconCalendarEvent className="w-4 h-4 shrink-0" />
+                        <span>{new Date(appointment.appointmentDate).toLocaleString('es-ES', {
                           dateStyle: 'medium',
                           timeStyle: 'short'
-                        })}
+                        })}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2 pt-2 md:pt-0">
                     {appointment.status === 'pendiente' && (
                       <>
                         <Button
@@ -176,12 +176,13 @@ export default function AppointmentsPage() {
       >
         <div className="space-y-4">
           <p className="text-gray-600">¿Estás seguro de que deseas eliminar permanentemente esta cita? Esta acción no se puede deshacer.</p>
-          <div className="pt-4 flex justify-end gap-3 border-t border-gray-100">
-            <Button variant="ghost" onClick={() => setAppointmentToDelete(null)}>
+          <div className="pt-4 flex flex-col-reverse sm:flex-row sm:justify-end gap-3 border-t border-gray-100">
+            <Button variant="ghost" onClick={() => setAppointmentToDelete(null)} className="w-full sm:w-auto">
               Cancelar
             </Button>
             <Button
               variant="danger"
+              className="w-full sm:w-auto"
               onClick={() => {
                 if (appointmentToDelete) {
                   deleteAppointment(appointmentToDelete).then(() => { toast.success("Cita eliminada correctamente"); }).catch(() => toast.error("Error al eliminar cita")); setAppointmentToDelete(null);
