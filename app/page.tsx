@@ -16,7 +16,7 @@ import { toast } from "sonner";
 
 export default function AppointmentsPage() {
   const { appointments, loading, error, deleteAppointment, updateStatus, refresh } = useAppointments();
-  
+
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [appointmentToDelete, setAppointmentToDelete] = useState<string | null>(null);
 
@@ -105,13 +105,13 @@ export default function AppointmentsPage() {
                           size="sm"
                           className="text-green-600 hover:text-green-700 hover:bg-green-50"
                           onClick={async () => {
-                          try {
-                            await updateStatus(appointment.id, 'confirmada');
-                            toast.success("Cita confirmada correctamente");
-                          } catch (e: any) {
-                            toast.error("Error al confirmar cita");
-                          }
-                        }}
+                            try {
+                              await updateStatus(appointment.id, 'confirmada');
+                              toast.success("Cita confirmada correctamente");
+                            } catch (e: any) {
+                              toast.error("Error al confirmar cita");
+                            }
+                          }}
                           title="Confirmar"
                         >
                           <IconCheck className="w-5 h-5" />
@@ -121,13 +121,13 @@ export default function AppointmentsPage() {
                           size="sm"
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           onClick={async () => {
-                          try {
-                            await updateStatus(appointment.id, 'cancelada');
-                            toast.success("Cita cancelada correctamente");
-                          } catch (e: any) {
-                            toast.error("Error al cancelar cita");
-                          }
-                        }}
+                            try {
+                              await updateStatus(appointment.id, 'cancelada');
+                              toast.success("Cita cancelada correctamente");
+                            } catch (e: any) {
+                              toast.error("Error al cancelar cita");
+                            }
+                          }}
                           title="Cancelar"
                         >
                           <IconX className="w-5 h-5" />
@@ -154,24 +154,24 @@ export default function AppointmentsPage() {
       )}
 
       {/* Creación Modal */}
-      <Modal 
-        isOpen={isCreateModalOpen} 
-        onClose={() => setIsCreateModalOpen(false)} 
+      <Modal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
         title="Agendar Nueva Cita"
       >
-        <CreateAppointmentForm 
+        <CreateAppointmentForm
           onSuccess={() => {
             setIsCreateModalOpen(false);
             refresh();
-          }} 
-          onCancel={() => setIsCreateModalOpen(false)} 
+          }}
+          onCancel={() => setIsCreateModalOpen(false)}
         />
       </Modal>
 
       {/* Eliminación Modal */}
-      <Modal 
-        isOpen={appointmentToDelete !== null} 
-        onClose={() => setAppointmentToDelete(null)} 
+      <Modal
+        isOpen={appointmentToDelete !== null}
+        onClose={() => setAppointmentToDelete(null)}
         title="Eliminar Cita"
       >
         <div className="space-y-4">
@@ -180,15 +180,15 @@ export default function AppointmentsPage() {
             <Button variant="ghost" onClick={() => setAppointmentToDelete(null)}>
               Cancelar
             </Button>
-            <Button 
-              variant="danger" 
+            <Button
+              variant="danger"
               onClick={() => {
                 if (appointmentToDelete) {
                   deleteAppointment(appointmentToDelete).then(() => { toast.success("Cita eliminada correctamente"); }).catch(() => toast.error("Error al eliminar cita")); setAppointmentToDelete(null);
                 }
               }}
             >
-               Eliminar
+              Eliminar
             </Button>
           </div>
         </div>
