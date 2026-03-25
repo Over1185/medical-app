@@ -12,6 +12,7 @@ import { CreateAppointmentForm } from "@/components/appointments/CreateAppointme
 import { IconPlus, IconTrash, IconCheck, IconX, IconCalendarEvent, IconStethoscope } from "@tabler/icons-react";
 import Link from "next/link";
 import type { AppointmentStatus } from "@/lib/appointments/types";
+import { toast } from "sonner";
 
 export default function AppointmentsPage() {
   const { appointments, loading, error, deleteAppointment, updateStatus } = useAppointments();
@@ -103,7 +104,14 @@ export default function AppointmentsPage() {
                           variant="ghost"
                           size="sm"
                           className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                          onClick={() => updateStatus(appointment.id, 'confirmada')}
+                          onClick={async () => {
+                          try {
+                            await updateStatus(appointment.id, 'confirmada');
+                            toast.success("Cita confirmada correctamente");
+                          } catch (e: any) {
+                            toast.error("Error al confirmar cita");
+                          }
+                        }}
                           title="Confirmar"
                         >
                           <IconCheck className="w-5 h-5" />
@@ -112,7 +120,14 @@ export default function AppointmentsPage() {
                           variant="ghost"
                           size="sm"
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => updateStatus(appointment.id, 'cancelada')}
+                          onClick={async () => {
+                          try {
+                            await updateStatus(appointment.id, 'cancelada');
+                            toast.success("Cita cancelada correctamente");
+                          } catch (e: any) {
+                            toast.error("Error al cancelar cita");
+                          }
+                        }}
                           title="Cancelar"
                         >
                           <IconX className="w-5 h-5" />
@@ -166,8 +181,7 @@ export default function AppointmentsPage() {
               variant="danger" 
               onClick={() => {
                 if (appointmentToDelete) {
-                  deleteAppointment(appointmentToDelete);
-                  setAppointmentToDelete(null);
+                  deleteAppointment(appointmentToDelete).then(() => { toast.success("Cita eliminada correctamente"); }).catch(() => toast.error("Error al eliminar cita")); setAppointmentToDelete(null);
                 }
               }}
             >

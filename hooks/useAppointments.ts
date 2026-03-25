@@ -32,20 +32,33 @@ export function useAppointments() {
     };
 
     const updateStatus = async (id: string, status: AppointmentStatus) => {
-        const res = await fetch(`/appointments/${id}/status`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status }),
-        });
-        if (!res.ok) throw new Error('Error al actualizar el estado');
-        setAppointments(prev => prev.map(a => a.id === id ? { ...a, status } : a));
-    };
+    const previousState = [...appointments];
+    setAppointments(prev => prev.map(a => a.id === id ? { ...a, status } : a));
+
+    try {
+      const res = await fetch(`/appointments/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) throw new Error('Error al actualizar el estado');
+    } catch (error) {
+      setAppointments(previousState);
+      throw error;
+    }
+  };
 
     const deleteAppointment = async (id: string) => {
-        const res = await fetch(`/appointments/${id}`, { method: 'DELETE' });
-        if (!res.ok) throw new Error('Error al eliminar la cita');
-        setAppointments(prev => prev.filter(a => a.id !== id));
-    };
+    const previousState = [...appointments];
+    setAppointments(prev => prev.filter(a => a.id !== id));
+    try {
+      const res = await fetch(`/appointments/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Error al eliminar la cita');
+    } catch (err: any) {
+      setAppointments(previousState);
+      throw err;
+    }
+  };
 
     useEffect(() => {
         fetchAppointments();
