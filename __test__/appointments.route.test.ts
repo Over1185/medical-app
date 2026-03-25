@@ -5,70 +5,78 @@ import { loadEnvFromDotEnvFile } from "@/__test__/helpers/load-env";
 
 loadEnvFromDotEnvFile();
 
+/**
+ * Estrategia de limpieza:
+ * no usamos transacciones por test porque los handlers ejecutan sobre la misma
+ * conexion/runtime que produccion. Para evitar estado residual, eliminamos por id.
+ */
 const createdIds: string[] = [];
 
 async function deleteAppointmentById(id: string): Promise<void> {
-    const { DELETE } = await import("@/app/appointments/[id]/route");
+  const { DELETE } = await import("@/app/appointments/[id]/route");
 
-    await DELETE(new Request(`http://localhost:3000/appointments/${id}`, {
-        method: "DELETE",
-    }), {
-        params: Promise.resolve({ id }),
-    });
+  await DELETE(
+    new Request(`http://localhost:3000/appointments/${id}`, {
+      method: "DELETE",
+    }),
+    {
+      params: Promise.resolve({ id }),
+    },
+  );
 }
 
 describe("Integracion real - POST /appointments", () => {
-    afterEach(async () => {
-        while (createdIds.length > 0) {
-            const id = createdIds.pop();
+  afterEach(async () => {
+    while (createdIds.length > 0) {
+      const id = createdIds.pop();
 
-            if (id) {
-                await deleteAppointmentById(id);
-            }
-        }
+      if (id) {
+        await deleteAppointmentById(id);
+      }
+    }
+  });
+
+  it("retorna 422 cuando faltan campos obligatorios", async () => {
+    const { POST } = await import("@/app/appointments/route");
+
+    const request = new Request("http://localhost:3000/appointments", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        patientName: "Paciente Incompleto",
+      }),
     });
 
-    it("retorna 422 cuando faltan campos obligatorios", async () => {
-        const { POST } = await import("@/app/appointments/route");
+    const response = await POST(request);
 
-        const request = new Request("http://localhost:3000/appointments", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                patientName: "Paciente Incompleto",
-            }),
-        });
+    expect(response.status).toBe(422);
+  });
 
-        const response = await POST(request);
+  it("retorna 201 y persiste una cita valida en Turso", async () => {
+    const { POST } = await import("@/app/appointments/route");
 
-        expect(response.status).toBe(422);
+    const request = new Request("http://localhost:3000/appointments", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        patientName: "Paciente Integracion",
+        doctorName: "Dr Integracion",
+        appointmentDate: "2026-04-10T10:30:00.000Z",
+        reason: "Prueba de persistencia",
+      }),
     });
 
-    it("retorna 201 y persiste una cita valida en Turso", async () => {
-        const { POST } = await import("@/app/appointments/route");
+    const response = await POST(request);
+    const body = await response.json();
 
-        const request = new Request("http://localhost:3000/appointments", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                patientName: "Paciente Integracion",
-                doctorName: "Dr Integracion",
-                appointmentDate: "2026-04-10T10:30:00.000Z",
-                reason: "Prueba de persistencia",
-            }),
-        });
+    expect(response.status).toBe(201);
+    expect(body.id).toBeTypeOf("string");
+    expect(body.status).toBe("pendiente");
 
-        const response = await POST(request);
-        const body = await response.json();
-
-        expect(response.status).toBe(201);
-        expect(body.id).toBeTypeOf("string");
-        expect(body.status).toBe("pendiente");
-
-        createdIds.push(body.id);
-    });
+    createdIds.push(body.id);
+  });
 });

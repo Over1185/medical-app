@@ -4,8 +4,14 @@ import {
   createAppointmentSchema,
   listQuerySchema,
 } from "@/lib/appointments/validation";
+import { ERROR_CODES } from "@/lib/errors/catalog";
 import { enforceWriteRateLimit } from "@/lib/http/rate-limit";
-import { errorResponse, HttpError, jsonResponse } from "@/lib/http/response";
+import {
+  errorResponse,
+  getRequestId,
+  HttpError,
+  jsonResponse,
+} from "@/lib/http/response";
 import { buildSecurityHeaders, isOriginAllowed } from "@/lib/http/security";
 
 export const runtime = "nodejs";
@@ -16,10 +22,15 @@ export const runtime = "nodejs";
  */
 export async function GET(request: Request): Promise<Response> {
   const origin = request.headers.get("origin");
+  const requestId = getRequestId(request);
 
   try {
     if (!isOriginAllowed(origin)) {
-      throw new HttpError(403, "Origen no permitido por CORS");
+      throw new HttpError(
+        403,
+        ERROR_CODES.CORS_FORBIDDEN,
+        "Origen no permitido por CORS",
+      );
     }
 
     const { searchParams } = new URL(request.url);
@@ -33,18 +44,21 @@ export async function GET(request: Request): Promise<Response> {
       parsedQuery.offset,
     );
 
-    return jsonResponse(appointments, { origin });
+    return jsonResponse(appointments, { origin, requestId });
   } catch (error) {
     if (error instanceof ZodError) {
-      return jsonResponse(
-        {
-          error: { message: "Parametros invalidos", details: error.flatten() },
-        },
-        { status: 422, origin },
+      return errorResponse(
+        new HttpError(
+          422,
+          ERROR_CODES.VALIDATION_ERROR,
+          "Parametros invalidos",
+          error.flatten(),
+        ),
+        { origin, requestId },
       );
     }
 
-    return errorResponse(error, origin);
+    return errorResponse(error, { origin, requestId });
   }
 }
 
@@ -54,10 +68,15 @@ export async function GET(request: Request): Promise<Response> {
  */
 export async function POST(request: Request): Promise<Response> {
   const origin = request.headers.get("origin");
+  const requestId = getRequestId(request);
 
   try {
     if (!isOriginAllowed(origin)) {
-      throw new HttpError(403, "Origen no permitido por CORS");
+      throw new HttpError(
+        403,
+        ERROR_CODES.CORS_FORBIDDEN,
+        "Origen no permitido por CORS",
+      );
     }
 
     enforceWriteRateLimit(request);
@@ -66,38 +85,56 @@ export async function POST(request: Request): Promise<Response> {
     const input = createAppointmentSchema.parse(payload);
     const appointment = await appointmentService.create(input);
 
-    return jsonResponse(appointment, { status: 201, origin });
+    return jsonResponse(appointment, { status: 201, origin, requestId });
   } catch (error) {
     if (error instanceof ZodError) {
-      return jsonResponse(
-        { error: { message: "Payload invalido", details: error.flatten() } },
-        { status: 422, origin },
+      return errorResponse(
+        new HttpError(
+          422,
+          ERROR_CODES.VALIDATION_ERROR,
+          "Payload invalido",
+          error.flatten(),
+        ),
+        { origin, requestId },
       );
     }
 
     if (error instanceof SyntaxError) {
-      return jsonResponse(
-        { error: { message: "JSON invalido en el body" } },
-        { status: 400, origin },
+      return errorResponse(
+        new HttpError(
+          400,
+          ERROR_CODES.INVALID_JSON_BODY,
+          "JSON invalido en el body",
+        ),
+        { origin, requestId },
       );
     }
 
-    return errorResponse(error, origin);
+    return errorResponse(error, { origin, requestId });
   }
 }
 
 export async function OPTIONS(request: Request): Promise<Response> {
   const origin = request.headers.get("origin");
+  const requestId = getRequestId(request);
 
   if (!isOriginAllowed(origin)) {
-    return jsonResponse(
-      { error: { message: "Origen no permitido por CORS" } },
-      { status: 403, origin },
+    return errorResponse(
+      new HttpError(
+        403,
+        ERROR_CODES.CORS_FORBIDDEN,
+        "Origen no permitido por CORS",
+      ),
+      { origin, requestId },
     );
   }
 
   return new Response(null, {
     status: 204,
-    headers: buildSecurityHeaders(origin),
+    headers: (() => {
+      const headers = buildSecurityHeaders(origin);
+      headers.set("X-Request-Id", requestId);
+      return headers;
+    })(),
   });
 }

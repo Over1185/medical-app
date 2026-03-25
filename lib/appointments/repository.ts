@@ -28,6 +28,10 @@ type AppointmentRow = {
   updated_at: string;
 };
 
+/**
+ * Mapea el formato persistido en SQL (snake_case) al contrato de dominio
+ * usado por la API (camelCase).
+ */
 function mapAppointmentRow(row: AppointmentRow): Appointment {
   return {
     id: row.id,
@@ -41,10 +45,22 @@ function mapAppointmentRow(row: AppointmentRow): Appointment {
   };
 }
 
+/**
+ * Repositorio SQL sobre Turso/libSQL.
+ *
+ * Contrato de retorno:
+ * - `findById` retorna `null` cuando no existe el registro.
+ * - `update` retorna `null` cuando el `id` no existe.
+ * - `delete` retorna `false` cuando no se elimina ninguna fila.
+ *
+ * Esta semantica evita lanzar errores de infraestructura en casos de negocio
+ * esperables (not found), delegando al service/handler la traduccion a HTTP 404.
+ */
 class TursoAppointmentRepository implements AppointmentRepository {
   async list(
     input: PaginationInput,
   ): Promise<{ data: Appointment[]; total: number }> {
+    // Separa lectura paginada y count total para mantener paginacion estable.
     const { limit, offset } = input;
     const rowsResult = await tursoClient.execute({
       sql: `
@@ -102,6 +118,7 @@ class TursoAppointmentRepository implements AppointmentRepository {
     const row = result.rows[0];
 
     if (!row) {
+      // `null` representa not found y es manejado aguas arriba por la capa de servicio.
       return null;
     }
 
@@ -196,6 +213,7 @@ class TursoAppointmentRepository implements AppointmentRepository {
     sets.push("updated_at = :updatedAt");
 
     if (sets.length === 0) {
+      // Update vacio: devolvemos el estado actual para mantener contrato determinista.
       return this.findById(id);
     }
 
@@ -205,6 +223,7 @@ class TursoAppointmentRepository implements AppointmentRepository {
     });
 
     if (result.rowsAffected === 0) {
+      // No existe cita con ese id.
       return null;
     }
 

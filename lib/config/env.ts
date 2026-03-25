@@ -1,5 +1,13 @@
 import { z } from "zod";
 
+/**
+ * Variables estrictamente necesarias en runtime (API en Vercel/Node).
+ *
+ * Nota:
+ * - `TURSO_DB_NAME` NO va aqui porque solo se usa en scripts CLI de package.json.
+ * - Este modulo debe reflejar exclusivamente variables requeridas para ejecutar
+ *   handlers y servicios en produccion.
+ */
 const envSchema = z.object({
   ALLOWED_ORIGINS: z.string().min(1),
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive(),

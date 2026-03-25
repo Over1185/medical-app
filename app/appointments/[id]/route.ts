@@ -7,8 +7,14 @@ import {
   idParamSchema,
   updateAppointmentSchema,
 } from "@/lib/appointments/validation";
+import { ERROR_CODES } from "@/lib/errors/catalog";
 import { enforceWriteRateLimit } from "@/lib/http/rate-limit";
-import { errorResponse, HttpError, jsonResponse } from "@/lib/http/response";
+import {
+  errorResponse,
+  getRequestId,
+  HttpError,
+  jsonResponse,
+} from "@/lib/http/response";
 import { buildSecurityHeaders, isOriginAllowed } from "@/lib/http/security";
 
 export const runtime = "nodejs";
@@ -28,10 +34,15 @@ export async function PUT(
   context: RouteContext,
 ): Promise<Response> {
   const origin = request.headers.get("origin");
+  const requestId = getRequestId(request);
 
   try {
     if (!isOriginAllowed(origin)) {
-      throw new HttpError(403, "Origen no permitido por CORS");
+      throw new HttpError(
+        403,
+        ERROR_CODES.CORS_FORBIDDEN,
+        "Origen no permitido por CORS",
+      );
     }
 
     enforceWriteRateLimit(request);
@@ -42,30 +53,39 @@ export async function PUT(
     const input = updateAppointmentSchema.parse(payload);
     const updated = await appointmentService.update(parsedId, input);
 
-    return jsonResponse(updated, { origin });
+    return jsonResponse(updated, { origin, requestId });
   } catch (error) {
     if (error instanceof AppointmentNotFoundError) {
-      return jsonResponse(
-        { error: { message: error.message } },
-        { status: 404, origin },
+      return errorResponse(
+        new HttpError(404, ERROR_CODES.APPOINTMENT_NOT_FOUND, error.message),
+        { origin, requestId },
       );
     }
 
     if (error instanceof ZodError) {
-      return jsonResponse(
-        { error: { message: "Datos invalidos", details: error.flatten() } },
-        { status: 422, origin },
+      return errorResponse(
+        new HttpError(
+          422,
+          ERROR_CODES.VALIDATION_ERROR,
+          "Datos invalidos",
+          error.flatten(),
+        ),
+        { origin, requestId },
       );
     }
 
     if (error instanceof SyntaxError) {
-      return jsonResponse(
-        { error: { message: "JSON invalido en el body" } },
-        { status: 400, origin },
+      return errorResponse(
+        new HttpError(
+          400,
+          ERROR_CODES.INVALID_JSON_BODY,
+          "JSON invalido en el body",
+        ),
+        { origin, requestId },
       );
     }
 
-    return errorResponse(error, origin);
+    return errorResponse(error, { origin, requestId });
   }
 }
 
@@ -78,10 +98,15 @@ export async function DELETE(
   context: RouteContext,
 ): Promise<Response> {
   const origin = request.headers.get("origin");
+  const requestId = getRequestId(request);
 
   try {
     if (!isOriginAllowed(origin)) {
-      throw new HttpError(403, "Origen no permitido por CORS");
+      throw new HttpError(
+        403,
+        ERROR_CODES.CORS_FORBIDDEN,
+        "Origen no permitido por CORS",
+      );
     }
 
     enforceWriteRateLimit(request);
@@ -92,39 +117,57 @@ export async function DELETE(
 
     return new Response(null, {
       status: 204,
-      headers: buildSecurityHeaders(origin),
+      headers: (() => {
+        const headers = buildSecurityHeaders(origin);
+        headers.set("X-Request-Id", requestId);
+        return headers;
+      })(),
     });
   } catch (error) {
     if (error instanceof AppointmentNotFoundError) {
-      return jsonResponse(
-        { error: { message: error.message } },
-        { status: 404, origin },
+      return errorResponse(
+        new HttpError(404, ERROR_CODES.APPOINTMENT_NOT_FOUND, error.message),
+        { origin, requestId },
       );
     }
 
     if (error instanceof ZodError) {
-      return jsonResponse(
-        { error: { message: "El id es invalido", details: error.flatten() } },
-        { status: 422, origin },
+      return errorResponse(
+        new HttpError(
+          422,
+          ERROR_CODES.VALIDATION_ERROR,
+          "El id es invalido",
+          error.flatten(),
+        ),
+        { origin, requestId },
       );
     }
 
-    return errorResponse(error, origin);
+    return errorResponse(error, { origin, requestId });
   }
 }
 
 export async function OPTIONS(request: Request): Promise<Response> {
   const origin = request.headers.get("origin");
+  const requestId = getRequestId(request);
 
   if (!isOriginAllowed(origin)) {
-    return jsonResponse(
-      { error: { message: "Origen no permitido por CORS" } },
-      { status: 403, origin },
+    return errorResponse(
+      new HttpError(
+        403,
+        ERROR_CODES.CORS_FORBIDDEN,
+        "Origen no permitido por CORS",
+      ),
+      { origin, requestId },
     );
   }
 
   return new Response(null, {
     status: 204,
-    headers: buildSecurityHeaders(origin),
+    headers: (() => {
+      const headers = buildSecurityHeaders(origin);
+      headers.set("X-Request-Id", requestId);
+      return headers;
+    })(),
   });
 }

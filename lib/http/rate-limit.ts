@@ -1,4 +1,5 @@
 import { env } from "@/lib/config/env";
+import { ERROR_CODES } from "@/lib/errors/catalog";
 import { HttpError } from "@/lib/http/response";
 
 type RateLimitState = {
@@ -43,6 +44,7 @@ export function enforceWriteRateLimit(request: Request): void {
   if (current.count >= MAX_REQUESTS) {
     throw new HttpError(
       429,
+      ERROR_CODES.RATE_LIMIT_EXCEEDED,
       "Demasiadas solicitudes. Intenta nuevamente en un minuto",
     );
   }
