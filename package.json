@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "test": "vitest",
+    "test:frontend": "vitest run __test__/*.test.tsx",
     "test:backend": "vitest run __test__/appointments.route.test.ts __test__/appointments-status.route.test.ts",
     "db:schema": "turso db shell ${TURSO_DB_NAME:-medical-app-citas} < db/schema.sql",
     "db:seed": "turso db shell ${TURSO_DB_NAME:-medical-app-citas} < db/seed.sql",
