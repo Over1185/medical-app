@@ -4,6 +4,15 @@ import { IconCheck } from "@tabler/icons-react";
 import { useAppointments } from "@/hooks/useAppointments";
 import { toast } from "sonner";
 
+type ValidationError = {
+    fieldErrors?: Record<string, string[]>;
+    message?: string;
+};
+
+const isValidationError = (error: unknown): error is ValidationError => {
+    return typeof error === "object" && error !== null;
+};
+
 /** Callbacks de control del formulario embebido en modal. */
 interface CreateAppointmentFormProps {
     onSuccess: () => void;
@@ -43,12 +52,15 @@ export function CreateAppointmentForm({ onSuccess, onCancel }: CreateAppointment
             });
             toast.success("¡Cita creada con éxito!");
             onSuccess();
-        } catch (err: any) {
-            if (err.fieldErrors) {
+        } catch (err: unknown) {
+            if (isValidationError(err) && err.fieldErrors) {
                 setFieldErrors(err.fieldErrors);
                 toast.error("Por favor revisa los campos señalados");
             } else {
-                toast.error(err.message || "Ocurrió un error al crear la cita");
+                const message = isValidationError(err) && err.message
+                    ? err.message
+                    : "Ocurrió un error al crear la cita";
+                toast.error(message);
             }
         } finally {
             setIsSubmitting(false);
@@ -68,8 +80,9 @@ export function CreateAppointmentForm({ onSuccess, onCancel }: CreateAppointment
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Nombre del Paciente</label>
+                <label htmlFor="patientName" className="text-sm font-medium text-gray-700">Nombre del Paciente</label>
                 <input
+                    id="patientName"
                     type="text"
                     name="patientName"
                     value={formData.patientName}
@@ -84,8 +97,9 @@ export function CreateAppointmentForm({ onSuccess, onCancel }: CreateAppointment
             </div>
 
             <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Nombre del Doctor</label>
+                <label htmlFor="doctorName" className="text-sm font-medium text-gray-700">Nombre del Doctor</label>
                 <input
+                    id="doctorName"
                     type="text"
                     name="doctorName"
                     value={formData.doctorName}
@@ -100,8 +114,9 @@ export function CreateAppointmentForm({ onSuccess, onCancel }: CreateAppointment
             </div>
 
             <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Fecha y Hora</label>
+                <label htmlFor="appointmentDate" className="text-sm font-medium text-gray-700">Fecha y Hora</label>
                 <input
+                    id="appointmentDate"
                     type="datetime-local"
                     name="appointmentDate"
                     value={formData.appointmentDate}
@@ -115,8 +130,9 @@ export function CreateAppointmentForm({ onSuccess, onCancel }: CreateAppointment
             </div>
 
             <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Motivo de la Consulta</label>
+                <label htmlFor="reason" className="text-sm font-medium text-gray-700">Motivo de la Consulta</label>
                 <textarea
+                    id="reason"
                     name="reason"
                     value={formData.reason}
                     onChange={handleChange}

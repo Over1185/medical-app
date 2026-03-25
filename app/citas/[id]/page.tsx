@@ -14,6 +14,14 @@ import { useAppointments } from "@/hooks/useAppointments";
 import { toast } from "sonner";
 import type { Appointment, AppointmentStatus } from "@/lib/appointments/types";
 
+const getErrorMessage = (error: unknown, fallback: string): string => {
+    if (error instanceof Error) {
+        return error.message;
+    }
+
+    return fallback;
+};
+
 /**
  * Vista de detalle para una cita individual.
  * Permite consultar datos, cambiar estado y eliminar el registro.
@@ -42,8 +50,8 @@ export default function AppointmentDetailPage() {
             await deleteAppointment(id);
             toast.success("Cita eliminada correctamente");
             router.push("/");
-        } catch (err: any) {
-            toast.error(err.message || "Error al eliminar cita");
+        } catch (err: unknown) {
+            toast.error(getErrorMessage(err, "Error al eliminar cita"));
             setIsDeleteModalOpen(false);
         }
     };
@@ -56,8 +64,8 @@ export default function AppointmentDetailPage() {
             await updateStatus(id, newStatus);
             if (appointment) setAppointment({ ...appointment, status: newStatus });
             toast.success(`Cita marcada como ${newStatus}`);
-        } catch (err: any) {
-            toast.error(err.message || "Error al actualizar estado");
+        } catch (err: unknown) {
+            toast.error(getErrorMessage(err, "Error al actualizar estado"));
         }
     };
 
