@@ -195,120 +195,55 @@ export default function AppointmentDetailPage() {
                                     <IconCalendarEvent className="w-4 h-4" />
                                     Fecha Programada
                                 </h4>
-                                {isEditing ? (
-                                    <input
-                                        aria-label="Fecha Programada"
-                                        type="datetime-local"
-                                        name="appointmentDate"
-                                        value={editFormData.appointmentDate}
-                                        onChange={handleEditFieldChange}
-                                        className="w-full h-10 px-3 py-2 rounded-lg border border-border focus:ring-primary focus:outline-none focus:ring-2 bg-white text-gray-900"
-                                    />
-                                ) : (
-                                    <>
-                                        <p className="text-xl font-semibold text-gray-900">
-                                            {new Date(appointment.appointmentDate).toLocaleString('es-ES', {
-                                                dateStyle: 'full',
-                                            })}
-                                        </p>
-                                        <p className="text-md text-gray-600 mt-1">
-                                            {new Date(appointment.appointmentDate).toLocaleString('es-ES', {
-                                                timeStyle: 'short'
-                                            })} Hrs
-                                        </p>
-                                    </>
-                                )}
+                                <p className="text-xl font-semibold text-gray-900">
+                                    {new Date(appointment.appointmentDate).toLocaleString('es-ES', {
+                                        dateStyle: 'full',
+                                    })}
+                                </p>
+                                <p className="text-md text-gray-600 mt-1">
+                                    {new Date(appointment.appointmentDate).toLocaleString('es-ES', {
+                                        timeStyle: 'short'
+                                    })} Hrs
+                                </p>
                             </div>
 
                             <div>
                                 <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Paciente</h4>
-                                {isEditing ? (
-                                    <input
-                                        aria-label="Paciente"
-                                        type="text"
-                                        name="patientName"
-                                        value={editFormData.patientName}
-                                        onChange={handleEditFieldChange}
-                                        className="w-full h-10 px-3 py-2 rounded-lg border border-border focus:ring-primary focus:outline-none focus:ring-2 bg-white text-gray-900"
-                                    />
-                                ) : (
-                                    <p className="text-xl font-medium text-gray-900">{appointment.patientName}</p>
-                                )}
+                                <p className="text-xl font-medium text-gray-900">{appointment.patientName}</p>
                             </div>
 
                             <div>
                                 <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Especialista</h4>
-                                {isEditing ? (
-                                    <input
-                                        aria-label="Especialista"
-                                        type="text"
-                                        name="doctorName"
-                                        value={editFormData.doctorName}
-                                        onChange={handleEditFieldChange}
-                                        className="w-full h-10 px-3 py-2 rounded-lg border border-border focus:ring-primary focus:outline-none focus:ring-2 bg-white text-gray-900"
-                                    />
-                                ) : (
-                                    <p className="text-lg font-medium text-gray-900 flex items-center gap-2">
-                                        <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs shadow-sm">
-                                            {appointment.doctorName.charAt(0).toUpperCase()}
-                                        </span>
-                                        Dr. {appointment.doctorName}
-                                    </p>
-                                )}
+                                <p className="text-lg font-medium text-gray-900 flex items-center gap-2">
+                                    <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs shadow-sm">
+                                        {appointment.doctorName.charAt(0).toUpperCase()}
+                                    </span>
+                                    Dr. {appointment.doctorName}
+                                </p>
                             </div>
                         </div>
 
                         <div className="flex flex-col h-full">
                             <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Motivo de Consulta</h4>
-                            {isEditing ? (
-                                <textarea
-                                    aria-label="Motivo de Consulta"
-                                    name="reason"
-                                    rows={4}
-                                    value={editFormData.reason}
-                                    onChange={handleEditFieldChange}
-                                    className="p-4 bg-white border border-border rounded-xl grow text-gray-700 leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary"
-                                />
-                            ) : (
-                                <div className="p-6 bg-yellow-50/50 border border-yellow-100 rounded-xl grow text-gray-700 leading-relaxed shadow-inner">
-                                    {appointment.reason}
-                                </div>
-                            )}
+                            <div className="p-6 bg-yellow-50/50 border border-yellow-100 rounded-xl grow text-gray-700 leading-relaxed shadow-inner">
+                                {appointment.reason}
+                            </div>
                         </div>
                     </div>
 
                     <div className="mt-12 pt-8 border-t border-gray-100 flex flex-col md:flex-row gap-4 md:items-center justify-between">
                         <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-                            {isEditing ? (
-                                <>
-                                    <Button
-                                        variant="primary"
-                                        onClick={handleSaveChanges}
-                                        className="w-full sm:w-auto shadow-sm"
-                                    >
-                                        Guardar Cambios
-                                    </Button>
-                                    <Button
-                                        variant="ghost"
-                                        onClick={handleCancelEdit}
-                                        className="w-full sm:w-auto"
-                                    >
-                                        Cancelar Edicion
-                                    </Button>
-                                </>
-                            ) : (
-                                <Button
-                                    variant="secondary"
-                                    onClick={() => setIsEditing(true)}
-                                    className="w-full sm:w-auto shadow-sm"
-                                >
-                                    Editar Datos
-                                </Button>
-                            )}
+                            <Button
+                                variant="secondary"
+                                onClick={() => setIsEditing(true)}
+                                className="w-full sm:w-auto shadow-sm"
+                            >
+                                Editar Datos
+                            </Button>
                             <Button
                                 variant="secondary"
                                 onClick={() => handleStatusChange('confirmada')}
-                                disabled={isEditing || appointment.status === 'confirmada'}
+                                disabled={appointment.status === 'confirmada'}
                                 className="w-full sm:w-auto shadow-sm"
                             >
                                 Confirmar Asistencia
@@ -316,7 +251,7 @@ export default function AppointmentDetailPage() {
                             <Button
                                 variant="secondary"
                                 onClick={() => handleStatusChange('cancelada')}
-                                disabled={isEditing || appointment.status === 'cancelada'}
+                                disabled={appointment.status === 'cancelada'}
                                 className="w-full sm:w-auto shadow-sm"
                             >
                                 Cancelar Cita
@@ -330,6 +265,63 @@ export default function AppointmentDetailPage() {
                     </div>
                 </CardContent>
             </Card>
+
+            <Modal
+                isOpen={isEditing}
+                onClose={handleCancelEdit}
+                title="Editar Datos de Cita"
+            >
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700">Paciente</label>
+                        <input
+                            type="text"
+                            name="patientName"
+                            value={editFormData.patientName}
+                            onChange={handleEditFieldChange}
+                            className="w-full h-10 px-3 py-2 rounded-lg border border-border focus:ring-primary focus:outline-none focus:ring-2 bg-white text-gray-900"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700">Especialista</label>
+                        <input
+                            type="text"
+                            name="doctorName"
+                            value={editFormData.doctorName}
+                            onChange={handleEditFieldChange}
+                            className="w-full h-10 px-3 py-2 rounded-lg border border-border focus:ring-primary focus:outline-none focus:ring-2 bg-white text-gray-900"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700">Fecha Programada</label>
+                        <input
+                            type="datetime-local"
+                            name="appointmentDate"
+                            value={editFormData.appointmentDate}
+                            onChange={handleEditFieldChange}
+                            className="w-full h-10 px-3 py-2 rounded-lg border border-border focus:ring-primary focus:outline-none focus:ring-2 bg-white text-gray-900"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700">Motivo de Consulta</label>
+                        <textarea
+                            name="reason"
+                            rows={4}
+                            value={editFormData.reason}
+                            onChange={handleEditFieldChange}
+                            className="w-full p-3 rounded-lg border border-border focus:ring-primary focus:outline-none focus:ring-2 bg-white text-gray-900 resize-none"
+                        />
+                    </div>
+                    <div className="pt-4 flex flex-col-reverse sm:flex-row sm:justify-end gap-3 border-t border-gray-100 mt-2">
+                        <Button variant="ghost" onClick={handleCancelEdit} className="w-full sm:w-auto">
+                            Cancelar
+                        </Button>
+                        <Button variant="primary" onClick={handleSaveChanges} className="w-full sm:w-auto">
+                            Guardar Cambios
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
 
             <Modal
                 isOpen={isDeleteModalOpen}
