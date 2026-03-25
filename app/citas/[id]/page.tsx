@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Spinner } from "@/components/ui/Spinner";
 import { SkeletonDetail } from "@/components/ui/Skeleton";
+import { Modal } from "@/components/ui/Modal";
 import { IconArrowLeft, IconTrash, IconCalendarEvent } from "@tabler/icons-react";
 import Link from "next/link";
 import { useAppointments } from "@/hooks/useAppointments";
@@ -19,6 +20,7 @@ export default function AppointmentDetailPage() {
     const { appointments, loading, deleteAppointment, updateStatus } = useAppointments();
 
     const [appointment, setAppointment] = useState<Appointment | null>(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
     useEffect(() => {
         if (appointments && appointments.length > 0) {
@@ -27,15 +29,14 @@ export default function AppointmentDetailPage() {
         }
     }, [appointments, id]);
 
-    const handleDelete = async () => {
-        if (!confirm("¿Estás seguro de que deseas eliminar permanentemente esta cita?")) return;
-
+    const confirmDelete = async () => {
         try {
             await deleteAppointment(id);
             toast.success("Cita eliminada correctamente");
             router.push("/");
         } catch (err: any) {
             toast.error(err.message || "Error al eliminar cita");
+            setIsDeleteModalOpen(false);
         }
     };
 
@@ -136,8 +137,8 @@ export default function AppointmentDetailPage() {
                             <div>
                                 <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Especialista</h4>
                                 <p className="text-lg font-medium text-gray-900 flex items-center gap-2">
-                                    <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">
-                                        {appointment.doctorName.charAt(0)}
+                                    <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs shadow-sm">
+                                        {appointment.doctorName.charAt(0).toUpperCase()}
                                     </span>
                                     Dr. {appointment.doctorName}
                                 </p>
@@ -172,13 +173,31 @@ export default function AppointmentDetailPage() {
                             </Button>
                         </div>
 
-                        <Button variant="danger" onClick={handleDelete} className="w-full sm:w-auto mt-4 sm:mt-0 shadow-sm">
+                        <Button variant="danger" onClick={() => setIsDeleteModalOpen(true)} className="w-full sm:w-auto mt-4 sm:mt-0 shadow-sm">
                             <IconTrash className="w-5 h-5 mr-2" />
                             Eliminar Registro
                         </Button>
                     </div>
                 </CardContent>
             </Card>
+
+            <Modal 
+                isOpen={isDeleteModalOpen} 
+                onClose={() => setIsDeleteModalOpen(false)} 
+                title="Eliminar Cita"
+            >
+                <div className="space-y-4">
+                    <p className="text-gray-600">¿Estás seguro de que deseas eliminar permanentemente esta cita? Esta acción no se puede deshacer.</p>
+                    <div className="pt-4 flex justify-end gap-3 border-t border-gray-100">
+                        <Button variant="ghost" onClick={() => setIsDeleteModalOpen(false)}>
+                            Cancelar
+                        </Button>
+                        <Button variant="danger" onClick={confirmDelete}>
+                            Eliminar
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 }

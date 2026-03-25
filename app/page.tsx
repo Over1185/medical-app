@@ -1,17 +1,23 @@
 "use client";
 
+import { useState } from "react";
 import { useAppointments } from "@/hooks/useAppointments";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Spinner } from "@/components/ui/Spinner";
 import { SkeletonCard } from "@/components/ui/Skeleton";
-import { IconPlus, IconTrash, IconCheck, IconX, IconCalendarEvent, IconUser, IconStethoscope } from "@tabler/icons-react";
+import { Modal } from "@/components/ui/Modal";
+import { CreateAppointmentForm } from "@/components/appointments/CreateAppointmentForm";
+import { IconPlus, IconTrash, IconCheck, IconX, IconCalendarEvent, IconStethoscope } from "@tabler/icons-react";
 import Link from "next/link";
 import type { AppointmentStatus } from "@/lib/appointments/types";
 
 export default function AppointmentsPage() {
   const { appointments, loading, error, deleteAppointment, updateStatus } = useAppointments();
+  
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [appointmentToDelete, setAppointmentToDelete] = useState<string | null>(null);
 
   const getStatusBadgeVariant = (status: AppointmentStatus) => {
     if (status === 'confirmada') return 'success';
@@ -26,12 +32,10 @@ export default function AppointmentsPage() {
           <h1 className="text-3xl font-bold text-foreground">Citas Médicas</h1>
           <p className="text-gray-500 mt-1">Gestiona los pacientes y horarios</p>
         </div>
-        <Link href="/citas/create">
-          <Button>
-            <IconPlus className="w-5 h-5 mr-2" />
-            Nueva Cita
-          </Button>
-        </Link>
+        <Button onClick={() => setIsCreateModalOpen(true)}>
+          <IconPlus className="w-5 h-5 mr-2" />
+          Nueva Cita
+        </Button>
       </div>
 
       {error && (
@@ -59,9 +63,9 @@ export default function AppointmentsPage() {
           <IconCalendarEvent className="w-12 h-12 mx-auto text-gray-300 mb-4" />
           <h3 className="text-lg font-medium text-gray-900">No hay citas</h3>
           <p className="text-gray-500 mt-1">Comienza creando una nueva cita médica.</p>
-          <Link href="/citas/create" className="inline-block mt-4">
-            <Button variant="secondary">Crear Cita</Button>
-          </Link>
+          <Button variant="secondary" onClick={() => setIsCreateModalOpen(true)} className="mt-4">
+            Crear Cita
+          </Button>
         </div>
       ) : (
         <div className="grid gap-4 mt-6">
@@ -122,9 +126,7 @@ export default function AppointmentsPage() {
                       variant="ghost"
                       size="sm"
                       className="text-gray-400 hover:text-red-600"
-                      onClick={() => {
-                        if (confirm('¿Eliminar cita?')) deleteAppointment(appointment.id);
-                      }}
+                      onClick={() => setAppointmentToDelete(appointment.id)}
                     >
                       <IconTrash className="w-5 h-5" />
                     </Button>
@@ -135,6 +137,45 @@ export default function AppointmentsPage() {
           ))}
         </div>
       )}
+
+      {/* Creación Modal */}
+      <Modal 
+        isOpen={isCreateModalOpen} 
+        onClose={() => setIsCreateModalOpen(false)} 
+        title="Agendar Nueva Cita"
+      >
+        <CreateAppointmentForm 
+          onSuccess={() => setIsCreateModalOpen(false)} 
+          onCancel={() => setIsCreateModalOpen(false)} 
+        />
+      </Modal>
+
+      {/* Eliminación Modal */}
+      <Modal 
+        isOpen={appointmentToDelete !== null} 
+        onClose={() => setAppointmentToDelete(null)} 
+        title="Eliminar Cita"
+      >
+        <div className="space-y-4">
+          <p className="text-gray-600">¿Estás seguro de que deseas eliminar permanentemente esta cita? Esta acción no se puede deshacer.</p>
+          <div className="pt-4 flex justify-end gap-3 border-t border-gray-100">
+            <Button variant="ghost" onClick={() => setAppointmentToDelete(null)}>
+              Cancelar
+            </Button>
+            <Button 
+              variant="danger" 
+              onClick={() => {
+                if (appointmentToDelete) {
+                  deleteAppointment(appointmentToDelete);
+                  setAppointmentToDelete(null);
+                }
+              }}
+            >
+               Eliminar
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
