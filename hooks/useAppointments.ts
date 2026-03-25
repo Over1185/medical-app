@@ -84,8 +84,13 @@ export function useAppointments() {
 
         if (!res.ok) {
             const errorData = await res.json().catch(() => null);
-            if (errorData?.error?.message) {
-                throw new Error(errorData.error.message);
+            if (errorData?.error) {
+                const errorMessage = errorData.error.message || 'Error al actualizar la cita';
+                const newErr = new Error(errorMessage) as CreateAppointmentApiError;
+                if (errorData.error.code === 'VALIDATION_ERROR' && errorData.error.details?.fieldErrors) {
+                    newErr.fieldErrors = errorData.error.details.fieldErrors;
+                }
+                throw newErr;
             }
             throw new Error('Error al actualizar la cita');
         }

@@ -35,6 +35,7 @@ export default function AppointmentDetailPage() {
     const [appointment, setAppointment] = useState<Appointment | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
     const [editFormData, setEditFormData] = useState({
         patientName: "",
         doctorName: "",
@@ -55,6 +56,7 @@ export default function AppointmentDetailPage() {
             appointmentDate: toLocalDateTime(source.appointmentDate),
             reason: source.reason,
         });
+        setFieldErrors({});
     };
 
     // Resuelve la cita actual a partir del id de la ruta y la lista cargada.
@@ -98,9 +100,18 @@ export default function AppointmentDetailPage() {
     const handleEditFieldChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = event.target;
         setEditFormData(prev => ({ ...prev, [name]: value }));
+        // Limpiamos el error del campo cuando el usuario empieza a escribir
+        if (fieldErrors[name]) {
+            setFieldErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[name];
+                return newErrors;
+            });
+        }
     };
 
     const handleSaveChanges = async () => {
+        setFieldErrors({});
         try {
             const updated = await updateAppointment(id, {
                 patientName: editFormData.patientName,
@@ -111,8 +122,14 @@ export default function AppointmentDetailPage() {
             setAppointment(updated);
             setIsEditing(false);
             toast.success("Cita actualizada correctamente");
-        } catch (err: unknown) {
-            toast.error(getErrorMessage(err, "Error al actualizar la cita"));
+        } catch (err: any) {
+            // Manejo estricto de errores de validación (Zod 422 desde la API)
+            if (err.fieldErrors) {
+                setFieldErrors(err.fieldErrors);
+                toast.error("Por favor, corrige los errores en el formulario");
+            } else {
+                toast.error(getErrorMessage(err, "Error al actualizar la cita"));
+            }
         }
     };
 
@@ -279,8 +296,12 @@ export default function AppointmentDetailPage() {
                             name="patientName"
                             value={editFormData.patientName}
                             onChange={handleEditFieldChange}
-                            className="w-full h-10 px-3 py-2 rounded-lg border border-border focus:ring-primary focus:outline-none focus:ring-2 bg-white text-gray-900"
+                            aria-invalid={!!fieldErrors.patientName}
+                            className={`w-full h-10 px-3 py-2 rounded-lg border ${fieldErrors.patientName ? 'border-red-500 focus:ring-red-500' : 'border-border focus:ring-primary'} focus:outline-none focus:ring-2 bg-white text-gray-900 transition-colors`}
                         />
+                        {fieldErrors.patientName && (
+                            <p className="text-sm text-red-500 mt-1">{fieldErrors.patientName[0]}</p>
+                        )}
                     </div>
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700">Especialista</label>
@@ -289,8 +310,12 @@ export default function AppointmentDetailPage() {
                             name="doctorName"
                             value={editFormData.doctorName}
                             onChange={handleEditFieldChange}
-                            className="w-full h-10 px-3 py-2 rounded-lg border border-border focus:ring-primary focus:outline-none focus:ring-2 bg-white text-gray-900"
+                            aria-invalid={!!fieldErrors.doctorName}
+                            className={`w-full h-10 px-3 py-2 rounded-lg border ${fieldErrors.doctorName ? 'border-red-500 focus:ring-red-500' : 'border-border focus:ring-primary'} focus:outline-none focus:ring-2 bg-white text-gray-900 transition-colors`}
                         />
+                        {fieldErrors.doctorName && (
+                            <p className="text-sm text-red-500 mt-1">{fieldErrors.doctorName[0]}</p>
+                        )}
                     </div>
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700">Fecha Programada</label>
@@ -299,8 +324,12 @@ export default function AppointmentDetailPage() {
                             name="appointmentDate"
                             value={editFormData.appointmentDate}
                             onChange={handleEditFieldChange}
-                            className="w-full h-10 px-3 py-2 rounded-lg border border-border focus:ring-primary focus:outline-none focus:ring-2 bg-white text-gray-900"
+                            aria-invalid={!!fieldErrors.appointmentDate}
+                            className={`w-full h-10 px-3 py-2 rounded-lg border ${fieldErrors.appointmentDate ? 'border-red-500 focus:ring-red-500' : 'border-border focus:ring-primary'} focus:outline-none focus:ring-2 bg-white text-gray-900 transition-colors`}
                         />
+                        {fieldErrors.appointmentDate && (
+                            <p className="text-sm text-red-500 mt-1">{fieldErrors.appointmentDate[0]}</p>
+                        )}
                     </div>
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700">Motivo de Consulta</label>
@@ -309,8 +338,12 @@ export default function AppointmentDetailPage() {
                             rows={4}
                             value={editFormData.reason}
                             onChange={handleEditFieldChange}
-                            className="w-full p-3 rounded-lg border border-border focus:ring-primary focus:outline-none focus:ring-2 bg-white text-gray-900 resize-none"
+                            aria-invalid={!!fieldErrors.reason}
+                            className={`w-full p-3 rounded-lg border ${fieldErrors.reason ? 'border-red-500 focus:ring-red-500' : 'border-border focus:ring-primary'} focus:outline-none focus:ring-2 bg-white text-gray-900 resize-none transition-colors`}
                         />
+                        {fieldErrors.reason && (
+                            <p className="text-sm text-red-500 mt-1">{fieldErrors.reason[0]}</p>
+                        )}
                     </div>
                     <div className="pt-4 flex flex-col-reverse sm:flex-row sm:justify-end gap-3 border-t border-gray-100 mt-2">
                         <Button variant="ghost" onClick={handleCancelEdit} className="w-full sm:w-auto">
