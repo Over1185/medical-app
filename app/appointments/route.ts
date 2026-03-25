@@ -114,6 +114,10 @@ export async function POST(request: Request): Promise<Response> {
   }
 }
 
+/**
+ * OPTIONS /appointments
+ * Responde preflight CORS para clientes web.
+ */
 export async function OPTIONS(request: Request): Promise<Response> {
   const origin = request.headers.get("origin");
   const requestId = getRequestId(request);

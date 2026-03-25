@@ -14,12 +14,19 @@ import Link from "next/link";
 import type { AppointmentStatus } from "@/lib/appointments/types";
 import { toast } from "sonner";
 
+/**
+ * Vista principal del dashboard de citas.
+ * Permite listar, crear, cambiar estado y eliminar citas.
+ */
 export default function AppointmentsPage() {
   const { appointments, loading, error, deleteAppointment, updateStatus, refresh } = useAppointments();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [appointmentToDelete, setAppointmentToDelete] = useState<string | null>(null);
 
+  /**
+   * Traduce estado de negocio a variante visual del badge.
+   */
   const getStatusBadgeVariant = (status: AppointmentStatus) => {
     if (status === 'confirmada') return 'success';
     if (status === 'cancelada') return 'danger';
@@ -89,6 +96,7 @@ export default function AppointmentsPage() {
                       </div>
                       <div className="flex items-center gap-1.5">
                         <IconCalendarEvent className="w-4 h-4 shrink-0" />
+                        {/* Se formatea en locale es-ES para mantener coherencia regional en la UI. */}
                         <span>{new Date(appointment.appointmentDate).toLocaleString('es-ES', {
                           dateStyle: 'medium',
                           timeStyle: 'short'
@@ -106,6 +114,7 @@ export default function AppointmentsPage() {
                           className="text-green-600 hover:text-green-700 hover:bg-green-50"
                           onClick={async () => {
                             try {
+                              // Confirmación optimista: primero actualiza estado y luego notifica éxito.
                               await updateStatus(appointment.id, 'confirmada');
                               toast.success("Cita confirmada correctamente");
                             } catch (e: any) {
@@ -122,6 +131,7 @@ export default function AppointmentsPage() {
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           onClick={async () => {
                             try {
+                              // Cancelación optimista con rollback manejado dentro del hook.
                               await updateStatus(appointment.id, 'cancelada');
                               toast.success("Cita cancelada correctamente");
                             } catch (e: any) {
@@ -159,6 +169,7 @@ export default function AppointmentsPage() {
         onClose={() => setIsCreateModalOpen(false)}
         title="Agendar Nueva Cita"
       >
+        {/* El formulario notifica al padre para cerrar modal y refrescar listado. */}
         <CreateAppointmentForm
           onSuccess={() => {
             setIsCreateModalOpen(false);

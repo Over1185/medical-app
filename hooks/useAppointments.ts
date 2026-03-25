@@ -1,11 +1,18 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { Appointment, CreateAppointmentInput, AppointmentStatus } from '@/lib/appointments/types';
 
+/**
+ * Hook de acceso y gestión de citas en el frontend.
+ * Expone estado local, acciones CRUD y refresco manual de datos.
+ */
 export function useAppointments() {
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    /**
+     * Obtiene todas las citas desde la API y sincroniza estado local.
+     */
     const fetchAppointments = useCallback(async () => {
         try {
             setLoading(true);
@@ -21,6 +28,9 @@ export function useAppointments() {
         }
     }, []);
 
+    /**
+     * Crea una cita y vuelve a sincronizar la lista para mantener consistencia.
+     */
     const createAppointment = async (input: CreateAppointmentInput) => {
         const res = await fetch('/appointments', {
             method: 'POST',
@@ -44,6 +54,10 @@ export function useAppointments() {
         await fetchAppointments();
     };
 
+    /**
+     * Actualiza estado con enfoque optimista para feedback inmediato.
+     * Si la API falla, revierte al estado previo.
+     */
     const updateStatus = async (id: string, status: AppointmentStatus) => {
         const previousState = [...appointments];
         setAppointments(prev => prev.map(a => a.id === id ? { ...a, status } : a));
@@ -61,6 +75,9 @@ export function useAppointments() {
         }
     };
 
+    /**
+     * Elimina una cita con actualización optimista y rollback en caso de error.
+     */
     const deleteAppointment = async (id: string) => {
         const previousState = [...appointments];
         setAppointments(prev => prev.filter(a => a.id !== id));
@@ -73,6 +90,7 @@ export function useAppointments() {
         }
     };
 
+    // Carga inicial al montar el hook.
     useEffect(() => {
         fetchAppointments();
     }, [fetchAppointments]);

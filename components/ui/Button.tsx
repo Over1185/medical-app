@@ -1,10 +1,14 @@
 import * as React from "react";
 
+/** Props del botón base con variantes y tamaños. */
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
     size?: 'sm' | 'md' | 'lg';
 }
 
+/**
+ * Botón base reutilizable con variantes visuales y tallas predefinidas.
+ */
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ({ className = '', variant = 'primary', size = 'md', ...props }, ref) => {
         const baseStyles = "inline-flex items-center justify-center rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:pointer-events-none disabled:opacity-50";

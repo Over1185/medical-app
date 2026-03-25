@@ -1,6 +1,7 @@
 import * as React from "react";
 import { IconX } from "@tabler/icons-react";
 
+/** Props requeridas para renderizar y controlar el modal. */
 interface ModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -8,6 +9,10 @@ interface ModalProps {
     children: React.ReactNode;
 }
 
+/**
+ * Modal accesible controlado por estado externo.
+ * Cierra por botón o click sobre backdrop.
+ */
 export function Modal({ isOpen, onClose, title, children }: ModalProps) {
     if (!isOpen) return null;
 

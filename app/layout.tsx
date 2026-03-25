@@ -18,6 +18,10 @@ export const metadata: Metadata = {
   description: "Dashboard para la gestión de citas médicas",
 };
 
+/**
+ * Layout raíz de la aplicación.
+ * Define tipografías globales, estructura base y contenedor de notificaciones.
+ */
 export default function RootLayout({
   children,
 }: Readonly<{

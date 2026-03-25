@@ -4,11 +4,16 @@ import { IconCheck } from "@tabler/icons-react";
 import { useAppointments } from "@/hooks/useAppointments";
 import { toast } from "sonner";
 
+/** Callbacks de control del formulario embebido en modal. */
 interface CreateAppointmentFormProps {
     onSuccess: () => void;
     onCancel: () => void;
 }
 
+/**
+ * Formulario de alta de citas dentro del modal principal.
+ * Gestiona validaciones de backend y muestra errores por campo.
+ */
 export function CreateAppointmentForm({ onSuccess, onCancel }: CreateAppointmentFormProps) {
     const { createAppointment } = useAppointments();
 
@@ -22,6 +27,9 @@ export function CreateAppointmentForm({ onSuccess, onCancel }: CreateAppointment
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
+    /**
+     * Envía los datos del formulario y convierte la fecha local a ISO para la API.
+     */
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -47,6 +55,9 @@ export function CreateAppointmentForm({ onSuccess, onCancel }: CreateAppointment
         }
     };
 
+    /**
+     * Actualiza campo controlado y limpia error específico cuando el usuario corrige.
+     */
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
         if (fieldErrors[e.target.name]) {

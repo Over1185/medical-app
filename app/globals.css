@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+/* Tokens globales de color y superficies base del tema. */
 :root {
   --background: #f8f9fa;
   --foreground: #1a1a1a;
@@ -25,6 +26,7 @@
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system;
 }
 
+/* Se mantiene una paleta clara consistente para evitar cambios automáticos de contraste. */
 @media (prefers-color-scheme: dark) {
   :root {
     /* Forzamos a light mode por defecto si no es requerido dark mode estrictamente */

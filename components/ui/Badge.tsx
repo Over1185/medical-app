@@ -1,9 +1,13 @@
 import * as React from "react";
 
+/** Props del badge con variante visual para estado. */
 export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
     variant?: 'default' | 'success' | 'warning' | 'danger';
 }
 
+/**
+ * Indicador visual de estado compacto.
+ */
 export function Badge({ className = '', variant = 'default', ...props }: BadgeProps) {
     const baseStyles = "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors";
 

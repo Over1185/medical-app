@@ -14,6 +14,10 @@ import { useAppointments } from "@/hooks/useAppointments";
 import { toast } from "sonner";
 import type { Appointment, AppointmentStatus } from "@/lib/appointments/types";
 
+/**
+ * Vista de detalle para una cita individual.
+ * Permite consultar datos, cambiar estado y eliminar el registro.
+ */
 export default function AppointmentDetailPage() {
     const router = useRouter();
     const { id } = useParams() as { id: string };
@@ -22,6 +26,7 @@ export default function AppointmentDetailPage() {
     const [appointment, setAppointment] = useState<Appointment | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
+    // Resuelve la cita actual a partir del id de la ruta y la lista cargada.
     useEffect(() => {
         if (appointments && appointments.length > 0) {
             const found = appointments.find(a => a.id === id);
@@ -29,6 +34,9 @@ export default function AppointmentDetailPage() {
         }
     }, [appointments, id]);
 
+    /**
+     * Ejecuta eliminación confirmada y redirige al dashboard al finalizar.
+     */
     const confirmDelete = async () => {
         try {
             await deleteAppointment(id);
@@ -40,6 +48,9 @@ export default function AppointmentDetailPage() {
         }
     };
 
+    /**
+     * Cambia el estado remoto y sincroniza la copia local del detalle.
+     */
     const handleStatusChange = async (newStatus: AppointmentStatus) => {
         try {
             await updateStatus(id, newStatus);
@@ -50,6 +61,9 @@ export default function AppointmentDetailPage() {
         }
     };
 
+    /**
+     * Traduce estado de negocio a variante visual del badge.
+     */
     const getStatusBadgeVariant = (status: AppointmentStatus) => {
         if (status === 'confirmada') return 'success';
         if (status === 'cancelada') return 'danger';

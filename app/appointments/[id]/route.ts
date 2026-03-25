@@ -19,6 +19,7 @@ import { buildSecurityHeaders, isOriginAllowed } from "@/lib/http/security";
 
 export const runtime = "nodejs";
 
+/** Contexto de ruta dinámica en Next.js para resolver params asíncronos. */
 type RouteContext = {
   params: Promise<{
     id: string;
@@ -147,6 +148,10 @@ export async function DELETE(
   }
 }
 
+/**
+ * OPTIONS /appointments/:id
+ * Responde preflight CORS para operaciones sobre un recurso específico.
+ */
 export async function OPTIONS(request: Request): Promise<Response> {
   const origin = request.headers.get("origin");
   const requestId = getRequestId(request);

@@ -1,5 +1,6 @@
 import { Card, CardContent } from "./Card";
 
+/** Placeholder para lista de citas mientras se cargan datos. */
 export function SkeletonCard() {
     return (
         <Card className="hover:shadow-md transition-shadow duration-200 overflow-hidden group border-border">
@@ -32,6 +33,7 @@ export function SkeletonCard() {
     );
 }
 
+/** Placeholder para pantalla de detalle de una cita. */
 export function SkeletonDetail() {
     return (
         <Card className="shadow-lg border-border animate-pulse">
