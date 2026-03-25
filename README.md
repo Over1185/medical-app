@@ -1,36 +1,100 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Medical App - Gestion de Citas
 
-## Getting Started
+Aplicacion sencilla para gestion de citas medicas, construida con Next.js.
 
-First, run the development server:
+El proyecto tiene dos frentes principales:
+
+- Backend API REST para citas.
+- Frontend para consumo y gestion visual.
+
+## Estado del proyecto
+
+Actualmente el backend incluye:
+
+- CRUD de citas.
+- Cambio de estado con endpoint dedicado.
+- Persistencia en Turso.
+- Validacion con Zod.
+- Contrato de errores estable para frontend.
+- Tests de integracion reales contra Turso.
+
+## Documentacion
+
+- Backend extendido: [docs/backend/README.md](docs/backend/README.md)
+- Frontend: [docs/frontend](docs/frontend/README.md) (en desarrollo)
+- Despliegue: [docs/deployment/README.md](docs/deployment/README.md) (en desarrollo)
+
+## Requisitos
+
+- Node.js 20+
+- [PNPM](https://pnpm.io/) (Para mas informacion sobre instalacion, [consulta la documentacion oficial de PNPM](https://pnpm.io/installation))
+- [Turso CLI](https://github.com/tursodatabase/turso-cli) (si vas a ejecutar schema/seed desde scripts)
+
+## Variables de entorno
+
+Usa [/.example.env](.example.env) como referencia.
+
+Variables runtime obligatorias:
+
+- ALLOWED_ORIGINS
+- RATE_LIMIT_WINDOW_MS
+- RATE_LIMIT_MAX_REQUESTS
+- TURSO_DATABASE_URL
+- TURSO_AUTH_TOKEN
+
+Variable opcional para scripts:
+
+- TURSO_DB_NAME
+
+## Instalacion
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Desarrollo
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Base de datos (Turso)
 
-## Learn More
+Aplicar schema:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm db:schema
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Cargar seed:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+pnpm db:seed
+```
 
-## Deploy on Vercel
+Reinicializar schema + seed:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+pnpm db:reset
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Testing
+
+Backend integracion real:
+
+```bash
+pnpm test:backend
+```
+
+Todos los tests:
+
+```bash
+pnpm test
+```
+
+## Build de produccion
+
+```bash
+pnpm build
+pnpm start
+```
