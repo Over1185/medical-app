@@ -15,7 +15,7 @@ import type { AppointmentStatus } from "@/lib/appointments/types";
 import { toast } from "sonner";
 
 export default function AppointmentsPage() {
-  const { appointments, loading, error, deleteAppointment, updateStatus } = useAppointments();
+  const { appointments, loading, error, deleteAppointment, updateStatus, refresh } = useAppointments();
   
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [appointmentToDelete, setAppointmentToDelete] = useState<string | null>(null);
@@ -160,7 +160,10 @@ export default function AppointmentsPage() {
         title="Agendar Nueva Cita"
       >
         <CreateAppointmentForm 
-          onSuccess={() => setIsCreateModalOpen(false)} 
+          onSuccess={() => {
+            setIsCreateModalOpen(false);
+            refresh();
+          }} 
           onCancel={() => setIsCreateModalOpen(false)} 
         />
       </Modal>
