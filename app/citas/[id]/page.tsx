@@ -5,9 +5,11 @@ import { useRouter, useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { IconArrowLeft, IconEdit, IconTrash } from "@tabler/icons-react";
+import { Spinner } from "@/components/ui/Spinner";
+import { IconArrowLeft, IconEdit, IconTrash, IconCalendarEvent, IconStethoscope } from "@tabler/icons-react";
 import Link from "next/link";
 import { useAppointments } from "@/hooks/useAppointments";
+import { toast } from "sonner";
 import type { Appointment, AppointmentStatus } from "@/lib/appointments/types";
 
 export default function AppointmentDetailPage() {
@@ -25,16 +27,24 @@ export default function AppointmentDetailPage() {
     }, [appointments, id]);
 
     const handleDelete = async () => {
-        if (confirm("¿Estás seguro de que deseas eliminar esta cita?")) {
+        if (!confirm("¿Estás seguro de que deseas eliminar permanentemente esta cita?")) return;
+
+        try {
             await deleteAppointment(id);
+            toast.success("Cita eliminada correctamente");
             router.push("/");
+        } catch (err: any) {
+            toast.error(err.message || "Error al eliminar cita");
         }
     };
 
     const handleStatusChange = async (newStatus: AppointmentStatus) => {
-        await updateStatus(id, newStatus);
-        if (appointment) {
-            setAppointment({ ...appointment, status: newStatus });
+        try {
+            await updateStatus(id, newStatus);
+            if (appointment) setAppointment({ ...appointment, status: newStatus });
+            toast.success(`Cita marcada como ${newStatus}`);
+        } catch (err: any) {
+            toast.error(err.message || "Error al actualizar estado");
         }
     };
 
@@ -44,76 +54,111 @@ export default function AppointmentDetailPage() {
         return 'warning';
     };
 
-    if (loading) return <div className="text-center py-12">Cargando detalles...</div>;
-    if (!appointment) return <div className="text-center py-12">Cita no encontrada</div>;
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[80vh] space-y-4">
+                <Spinner className="w-12 h-12 text-primary" />
+                <p className="text-gray-500 font-medium">Cargando detalles de la cita...</p>
+            </div>
+        );
+    }
+
+    if (!appointment) {
+        return (
+            <div className="text-center py-20 bg-white rounded-2xl border border-gray-200 mt-10 max-w-3xl mx-auto shadow-sm animate-in fade-in duration-500">
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Cita no encontrada</h3>
+                <p className="text-gray-500 mb-6">El registro que buscas no existe o ha sido eliminado.</p>
+                <Link href="/">
+                    <Button>Ir al Panel Principal</Button>
+                </Link>
+            </div>
+        );
+    }
 
     return (
-        <div className="max-w-3xl mx-auto p-6 space-y-6">
+        <div className="max-w-4xl mx-auto p-6 space-y-6 animate-in fade-in duration-500">
             <Link href="/">
-                <Button variant="ghost" className="mb-4 -ml-4">
+                <Button variant="ghost" className="mb-2 -ml-3 text-gray-500 hover:text-gray-900">
                     <IconArrowLeft className="w-5 h-5 mr-2" />
-                    Volver
+                    Volver al Panel
                 </Button>
             </Link>
 
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between border-b pb-6">
-                    <CardTitle>Detalles de la Cita</CardTitle>
-                    <Badge variant={getStatusBadgeVariant(appointment.status)} className="text-sm px-3 py-1">
+            <Card className="shadow-lg border-border">
+                <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-6 gap-4 bg-gray-50/50 rounded-t-xl">
+                    <div className="space-y-1">
+                        <CardTitle className="text-2xl font-bold text-gray-900">Consulta de Paciente</CardTitle>
+                        <p className="text-sm text-gray-500">Gestión individual de la cita médica</p>
+                    </div>
+                    <Badge variant={getStatusBadgeVariant(appointment.status)} className="text-sm px-4 py-1.5 shadow-sm self-start sm:self-center">
                         {appointment.status.toUpperCase()}
                     </Badge>
                 </CardHeader>
-                <CardContent className="pt-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-6">
-                            <div>
-                                <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Paciente</h4>
-                                <p className="text-lg font-medium text-gray-900 mt-1">{appointment.patientName}</p>
-                            </div>
-
-                            <div>
-                                <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Doctor</h4>
-                                <p className="text-lg font-medium text-gray-900 mt-1">Dr. {appointment.doctorName}</p>
-                            </div>
-
-                            <div>
-                                <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Fecha y Hora</h4>
-                                <p className="text-lg font-medium text-gray-900 mt-1">
+                <CardContent className="pt-8 px-6 sm:px-10 pb-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                        <div className="space-y-8">
+                            <div className="bg-gray-50 p-5 rounded-xl border border-gray-100">
+                                <h4 className="text-xs font-bold text-primary uppercase tracking-widest mb-2 flex items-center gap-2">
+                                    <IconCalendarEvent className="w-4 h-4" />
+                                    Fecha Programada
+                                </h4>
+                                <p className="text-xl font-semibold text-gray-900">
                                     {new Date(appointment.appointmentDate).toLocaleString('es-ES', {
                                         dateStyle: 'full',
-                                        timeStyle: 'short'
                                     })}
+                                </p>
+                                <p className="text-md text-gray-600 mt-1">
+                                    {new Date(appointment.appointmentDate).toLocaleString('es-ES', {
+                                        timeStyle: 'short'
+                                    })} Hrs
+                                </p>
+                            </div>
+
+                            <div>
+                                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Paciente</h4>
+                                <p className="text-xl font-medium text-gray-900">{appointment.patientName}</p>
+                            </div>
+
+                            <div>
+                                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Especialista</h4>
+                                <p className="text-lg font-medium text-gray-900 flex items-center gap-2">
+                                    <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">
+                                        {appointment.doctorName.charAt(0)}
+                                    </span>
+                                    Dr. {appointment.doctorName}
                                 </p>
                             </div>
                         </div>
 
-                        <div>
-                            <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Motivo de Consulta</h4>
-                            <div className="mt-2 p-4 bg-gray-50 rounded-lg min-h-[100px] text-gray-700">
+                        <div className="flex flex-col h-full">
+                            <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Motivo de Consulta</h4>
+                            <div className="p-6 bg-yellow-50/50 border border-yellow-100 rounded-xl flex-grow text-gray-700 leading-relaxed shadow-inner">
                                 {appointment.reason}
                             </div>
                         </div>
                     </div>
 
-                    <div className="mt-10 pt-6 border-t flex flex-wrap gap-4 items-center justify-between">
-                        <div className="space-x-2">
+                    <div className="mt-12 pt-8 border-t border-gray-100 flex flex-col sm:flex-row gap-4 items-center justify-between">
+                        <div className="flex items-center gap-3 w-full sm:w-auto">
                             <Button
                                 variant="secondary"
                                 onClick={() => handleStatusChange('confirmada')}
                                 disabled={appointment.status === 'confirmada'}
+                                className="w-full sm:w-auto shadow-sm"
                             >
-                                Confirmar Cita
+                                Confirmar Asistencia
                             </Button>
                             <Button
                                 variant="secondary"
                                 onClick={() => handleStatusChange('cancelada')}
                                 disabled={appointment.status === 'cancelada'}
+                                className="w-full sm:w-auto shadow-sm"
                             >
                                 Cancelar Cita
                             </Button>
                         </div>
 
-                        <Button variant="danger" onClick={handleDelete}>
+                        <Button variant="danger" onClick={handleDelete} className="w-full sm:w-auto mt-4 sm:mt-0 shadow-sm">
                             <IconTrash className="w-5 h-5 mr-2" />
                             Eliminar Registro
                         </Button>
