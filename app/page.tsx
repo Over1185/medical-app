@@ -46,16 +46,16 @@ export default function AppointmentsPage() {
       )}
 
       {loading && appointments.length === 0 ? (
-        <div className="relative mt-6">
+        <div className="relative mt-6 w-full">
           <div className="grid gap-4 opacity-50 blur-[2px] pointer-events-none">
             <SkeletonCard />
             <SkeletonCard />
             <SkeletonCard />
           </div>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <div className="bg-white/90 backdrop-blur-md p-6 rounded-2xl shadow-xl flex flex-col items-center">
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-4 pointer-events-none">
+            <div className="bg-white/90 backdrop-blur-md p-6 rounded-2xl shadow-xl flex flex-col items-center justify-center text-center w-full max-w-70 sm:max-w-sm border border-gray-100">
               <Spinner className="w-12 h-12 text-primary" />
-              <p className="text-gray-800 font-medium mt-4">Actualizando citas médicas...</p>
+              <p className="text-gray-800 font-medium mt-4 text-sm sm:text-base">Actualizando citas médicas...</p>
             </div>
           </div>
         </div>

@@ -58,20 +58,22 @@ export default function AppointmentDetailPage() {
 
     if (loading) {
         return (
-            <div className="max-w-4xl mx-auto p-6 space-y-6 animate-in fade-in duration-500 relative">
+            <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6 animate-in fade-in duration-500 relative w-full flex flex-col">
                 <Link href="/">
                     <Button variant="ghost" className="mb-2 -ml-3 text-gray-500 hover:text-gray-900" disabled>
                         <IconArrowLeft className="w-5 h-5 mr-2" />
                         Volver al Panel
                     </Button>
                 </Link>
-                <div className="opacity-50 blur-[2px] pointer-events-none">
-                    <SkeletonDetail />
-                </div>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <div className="bg-white/90 backdrop-blur-md p-6 rounded-2xl shadow-xl flex flex-col items-center">
-                        <Spinner className="w-12 h-12 text-primary" />
-                        <p className="text-gray-800 font-medium mt-4">Cargando detalles de consulta...</p>
+                <div className="relative w-full">
+                    <div className="opacity-50 blur-[2px] pointer-events-none w-full">
+                        <SkeletonDetail />
+                    </div>
+                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-2 pointer-events-none">
+                        <div className="bg-white/90 backdrop-blur-md p-5 sm:p-6 rounded-2xl shadow-xl flex flex-col items-center justify-center text-center w-full max-w-70 sm:max-w-sm border border-gray-100">
+                            <Spinner className="w-10 h-10 sm:w-12 sm:h-12 text-primary" />
+                            <p className="text-gray-800 font-medium mt-3 sm:mt-4 text-sm sm:text-base">Cargando detalles de consulta...</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -147,7 +149,7 @@ export default function AppointmentDetailPage() {
 
                         <div className="flex flex-col h-full">
                             <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Motivo de Consulta</h4>
-                            <div className="p-6 bg-yellow-50/50 border border-yellow-100 rounded-xl flex-grow text-gray-700 leading-relaxed shadow-inner">
+                            <div className="p-6 bg-yellow-50/50 border border-yellow-100 rounded-xl grow text-gray-700 leading-relaxed shadow-inner">
                                 {appointment.reason}
                             </div>
                         </div>
