@@ -30,6 +30,9 @@ vi.mock("sonner", () => ({
     },
 }));
 
+/**
+ * Pruebas unitarias de la pantalla de detalle de cita.
+ */
 describe("AppointmentDetailPage", () => {
     beforeEach(() => {
         hookState.appointments = [];
@@ -44,6 +47,9 @@ describe("AppointmentDetailPage", () => {
         cleanup();
     });
 
+    /**
+     * Muestra feedback de carga mientras se obtiene la cita.
+     */
     it("muestra estado de carga cuando loading es true", () => {
         hookState.loading = true;
 
@@ -52,6 +58,9 @@ describe("AppointmentDetailPage", () => {
         expect(screen.getByText("Cargando detalles de consulta...")).toBeDefined();
     });
 
+    /**
+     * Presenta estado vacío cuando el id no existe en el listado.
+     */
     it("muestra estado no encontrado cuando no existe la cita", () => {
         hookState.loading = false;
         hookState.appointments = [];
@@ -61,6 +70,9 @@ describe("AppointmentDetailPage", () => {
         expect(screen.getByText("Cita no encontrada")).toBeDefined();
     });
 
+    /**
+     * Verifica apertura de modal para confirmar eliminación.
+     */
     it("abre el modal de eliminacion al pulsar Eliminar Registro", () => {
         hookState.loading = false;
         hookState.appointments = [
@@ -83,6 +95,9 @@ describe("AppointmentDetailPage", () => {
         expect(screen.getByText("¿Estás seguro de que deseas eliminar permanentemente esta cita? Esta acción no se puede deshacer.")).toBeDefined();
     });
 
+    /**
+     * Verifica integración de guardado de edición vía updateAppointment.
+     */
     it("guarda cambios en modo edicion llamando updateAppointment", () => {
         hookState.loading = false;
         hookState.appointments = [

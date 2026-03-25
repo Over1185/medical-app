@@ -21,6 +21,9 @@ vi.mock("sonner", () => ({
     },
 }));
 
+/**
+ * Pruebas unitarias del formulario de alta de citas.
+ */
 describe("CreateAppointmentForm", () => {
     beforeEach(() => {
         vi.clearAllMocks();
@@ -31,6 +34,9 @@ describe("CreateAppointmentForm", () => {
         vi.restoreAllMocks();
     });
 
+    /**
+     * Comprueba el flujo exitoso de envío y callback de éxito.
+     */
     it("envia el formulario y ejecuta onSuccess", async () => {
         createAppointmentMock.mockResolvedValue(undefined);
 
@@ -74,6 +80,9 @@ describe("CreateAppointmentForm", () => {
         expect(onSuccess).toHaveBeenCalledTimes(1);
     });
 
+    /**
+     * Asegura render de errores por campo devueltos por backend.
+     */
     it("muestra errores por campo cuando backend responde validation error", async () => {
         createAppointmentMock.mockRejectedValue({
             fieldErrors: {
@@ -105,6 +114,9 @@ describe("CreateAppointmentForm", () => {
         expect(toastErrorMock).toHaveBeenCalledWith("Por favor revisa los campos señalados");
     });
 
+    /**
+     * Verifica la acción de cancelación del formulario.
+     */
     it("ejecuta onCancel al pulsar el boton cancelar", () => {
         const onCancel = vi.fn();
 

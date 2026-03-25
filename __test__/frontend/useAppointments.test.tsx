@@ -14,6 +14,9 @@ const baseAppointment: Appointment = {
     updatedAt: "2026-03-24T12:00:00.000Z",
 };
 
+/**
+ * Pruebas unitarias del hook de datos de citas.
+ */
 describe("useAppointments", () => {
     beforeEach(() => {
         vi.restoreAllMocks();
@@ -23,6 +26,9 @@ describe("useAppointments", () => {
         vi.unstubAllGlobals();
     });
 
+    /**
+     * Confirma la carga inicial de datos al montar el hook.
+     */
     it("carga citas al montar el hook", async () => {
         const fetchMock = vi.fn().mockResolvedValue({
             ok: true,
@@ -43,6 +49,9 @@ describe("useAppointments", () => {
         expect(fetchMock).toHaveBeenCalledWith("/appointments");
     });
 
+    /**
+     * Valida rollback local cuando falla la actualización optimista de estado.
+     */
     it("revierte el cambio optimista de estado cuando PATCH falla", async () => {
         const fetchMock = vi
             .fn()
@@ -77,6 +86,9 @@ describe("useAppointments", () => {
         });
     });
 
+    /**
+     * Verifica creación y posterior sincronización del listado.
+     */
     it("crea una cita y refresca la lista", async () => {
         const createdAppointment = {
             ...baseAppointment,
